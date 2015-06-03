@@ -3,7 +3,6 @@ from pymongo import MongoClient, database
 import mechanize
 from BeautifulSoup import BeautifulSoup
 from bson import ObjectId
-from pprint import pprint
 
 client = MongoClient()
 db = client.kenesh
@@ -22,7 +21,7 @@ def scraper():
 
     url = "http://www.kenesh.kg/RU/Folders/4258-Uchastie_deputatov_v_zasedaniyax_ZHogorku_Kenesha.aspx"
     br.open(url)
-
+    doc_array = []
     for link in br.links(text_regex="Сведения об участии депутатов в заседаниях"):
         link_url = "http://kenesh.kg" + str(link.url)
         # Open absentees link.url
@@ -48,7 +47,8 @@ def scraper():
                 'value': ''
             }
         }
-        doc_array = []
+
+        doc_id = ObjectId()
         # Iterate through out table rows, use slicing to skip the header
         for row in table_rows[1:]:
             json_obj = {}
@@ -68,9 +68,9 @@ def scraper():
                                 json_obj['lastName'] = names[0].text
                             # if we are in fourth cell (fourth column)
                             elif index == 4:
-                                json_obj['transferred_vote_to'] = {}
+                                json_obj['transferredVoteTo'] = {}
                                 transferred_vote_to = cell.findAll('div')
-                                json_obj['transferred_vote_to'] = transferred_vote_to[0].text
+                                json_obj['transferredVoteTo'] = transferred_vote_to[0].text
 
                         # if this row doesnt have name and date value td(s) because of spanning
                         # let's get them from temporary json we build for this reason
@@ -79,7 +79,7 @@ def scraper():
                             if temp_data['reasonDetail'] != '':
                                 json_obj['reasonDetail'] = temp_data['reasonDetail']
                         if temp_data['date']['counter'] > 0:
-                            json_obj['session_date'] = temp_data['date']['value']
+                            json_obj['sessionDate'] = temp_data['date']['value']
                     else:
                         if cell.findAll('div'):
                             # But first, let's check if any td has rowspan
@@ -122,17 +122,15 @@ def scraper():
 
                             # if we are in third cell (third column)
                             elif index == 3:
-                                json_obj['session_date'] = {}
+                                json_obj['sessionDate'] = {}
                                 date = cell.findAll('div')
-                                json_obj['session_date'] = date[0].text
+                                json_obj['sessionDate'] = date[0].text
 
                             # if we are in fourth cell (fourth column)
                             elif index == 4:
-                                json_obj['transferred_vote_to'] = {}
+                                json_obj['transferredVoteTo'] = {}
                                 transferred_vote_to = cell.findAll('div')
-                                json_obj['transferred_vote_to'] = transferred_vote_to[0].text
-
-
+                                json_obj['transferredVoteTo'] = transferred_vote_to[0].text
 
             #print json_obj
             doc_array.append(json_obj)
@@ -142,13 +140,12 @@ def scraper():
             if temp_data['date']['counter'] > 0:
                 temp_data['date']['counter'] -= 1
             print "----------------------"
-
         print '----------------------------------------'
-        # Time to save the json document in mongodb
-        doc = {
-            'absenceData': doc_array
-        }
-        db.keneshScraper.insert(doc)
+    doc = {
+        'absenceData': doc_array
+    }
+    # Time to save the json document in mongodb
+    db.keneshScraper.insert(doc)
 
 
 # Check if the table cell(td) has attribute rowspan and return the value of it
