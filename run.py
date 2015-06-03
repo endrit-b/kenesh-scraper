@@ -24,7 +24,7 @@ def scraper():
     br.open(url)
 
     for link in br.links(text_regex="Сведения об участии депутатов в заседаниях"):
-        link_url = "http://kenesh.kg/RU/Articles/27973-Svedeniya_ob_uchastii_deputatov_v_zasedaniyax_ZHK_1112fevralya_2015_goda_.aspx"
+        link_url = "http://kenesh.kg" + str(link.url)
         # Open absentees link.url
         respose = br1.open(link_url)
         # Read content of the link and load it in soup
@@ -63,7 +63,8 @@ def scraper():
                             # if we are in first cell (first column)
                             if index == 1:
                                 names = cell.findAll('div')
-                                json_obj['firstName'] = names[1].text
+                                if len(names) > 1:
+                                    json_obj['firstName'] = names[1].text
                                 json_obj['lastName'] = names[0].text
                             # if we are in fourth cell (fourth column)
                             elif index == 4:
@@ -106,7 +107,8 @@ def scraper():
                             # if we are in first cell (first column)
                             if index == 1:
                                 names = cell.findAll('div')
-                                json_obj['firstName'] = names[1].text
+                                if len(names) > 1:
+                                    json_obj['firstName'] = names[1].text
                                 json_obj['lastName'] = names[0].text
 
                             # if we are in second cell (second column)
@@ -131,7 +133,8 @@ def scraper():
                                 json_obj['transferred_vote_to'] = transferred_vote_to[0].text
 
 
-            print json_obj
+
+            #print json_obj
             doc_array.append(json_obj)
             # Decrement counters as the rows pass
             if temp_data['reason']['counter'] > 0:
@@ -146,7 +149,6 @@ def scraper():
             'absenceData': doc_array
         }
         db.keneshScraper.insert(doc)
-        break
 
 
 # Check if the table cell(td) has attribute rowspan and return the value of it
