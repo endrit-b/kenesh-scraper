@@ -7,6 +7,7 @@ from logging.handlers import RotatingFileHandler
 # Create MongoDB database object.
 mongo = PyMongo()
 
+
 def create_app():
 
     #Here we  create flask app
@@ -20,6 +21,7 @@ def create_app():
 
     #Import blueprint modules
     from app.mod_rank.views import mod_rank
+    app.register_blueprint(mod_rank)
 
     #Initialize the app to work with MongoDB
     mongo.init_app(app, config_prefix='MONGO')

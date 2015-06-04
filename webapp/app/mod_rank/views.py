@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template
-from flask.views import View
 
-mod_rank = Blueprint('rank', __name__)
+mod_rank = Blueprint('mod_rank', __name__)
 
 @mod_rank.route('/', methods=['GET'])
 def rank():
