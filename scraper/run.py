@@ -243,7 +243,6 @@ def scrape_mp_bio_data():
         #"http://www.kenesh.kg/RU/Articles/297-ABDIEV_Kurmantaj__Frakciya_AtaZHurt.aspx"
 
         text = link.text
-        '''
         print text
         deputy_data = text.split()
         print len(deputy_data)
@@ -275,7 +274,7 @@ def scrape_mp_bio_data():
         print deputy_f_name
         print mp_party
         print "-----------------------"
-        '''
+
         # Open mp's profile page
         respose = br3.open(link_deputy_url)
         # Read content of the link and load it in soup
