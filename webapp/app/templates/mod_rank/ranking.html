@@ -1,110 +1,64 @@
 {% extends "layout.html" %}
 {% block body %}
+
+
+<script>
+
+
+function getAbsentees(){
+    $.ajax({
+      type: "POST",
+      url: "{{ url_for('mod_api.absentees') }}",
+      data: {}
+    }).done(function() {
+
+    });
+}
+</script>
+
 <!-- About Section -->
 <section id="about">
     <div class="container">
+
+        
         <div class="row">
             <div class="col-lg-12 text-center">
-                <h2 class="section-heading">It only took 7 days</h2>
+                <h2 class="section-heading">Top Absentees</h2>
                 <h3 class="section-subheading text-muted">
-                    A partnership between local youths, Open Data Kosovo, and UNDP/SDC under the SAEK project.
+                    Ranking members of parliament based on their absenteeism.
                 </h3>
             </div>
         </div>
         <div class="row">
             <div class="col-lg-12">
                 <ul class="timeline">
-                    <li>
-                        <div class="timeline-image">
-                            <img class="img-circle img-responsive" src="{{ url_for('static', filename='img/bedri-cahani.png') }}" alt="">
-                        </div>
-                        <div class="timeline-panel">
-                            <div class="timeline-heading">
-                                <h4>Youth Engagement</h4>
-                                <h4 class="subheading">Local Communities</h4>
+                    {% set rank = 1 %}
+
+                    {% for absentee in absentees %}
+                        {% if loop.index % 2 == 0 %}
+                        <li>
+                        {% else %}
+                        <li class="timeline-inverted">
+                        {% endif %}
+                            <div class="timeline-image">
+                                <img class="img-circle img-responsive" src="http://www.kenesh.kg/MyFiles/image/%D0%A1%D0%B0%D0%BC%D0%B0%D0%BA%D0%BE%D0%B2%20%D0%9A_%20%D0%A1_.jpg" alt="">
                             </div>
-                            <div class="timeline-body">
-                                <p class="text-muted">We reached out to local communities for volunteer data collectors. Mr Bedri Cahani, director of the "Hajdar Dushi" school, even involved his students.</p>
+                            <div class="timeline-panel">
+                                <div class="timeline-heading">
+                                    <h4><font style="color:#FDD035">#{{ rank }}:</font> {{ absentee.lastName }}</h4>
+                                    <h4 class="subheading">{{ absentee.firstName }}</h4>
+                                </div>
+                                <div class="timeline-body">
+                                    <p class="text-muted">
+                                    Фракция «Ата Мекен»
+                                    <br>
+                                    <font style="color:#FDD035" size="20"><strong>{{ absentee.count }}</strong></em></font>
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    </li>
-                    <li class="timeline-inverted">
-                        <div class="timeline-image">
-                            <img class="img-circle img-responsive" src="{{ url_for('static', filename='img/small-team.png') }}" alt="">
-                        </div>
-                        <div class="timeline-panel">
-                            <div class="timeline-heading">
-                                <h4>Small Teams</h4>
-                                <h4 class="subheading">Big Results</h4>
-                            </div>
-                            <div class="timeline-body">
-                                <p class="text-muted">We organized ourselves in small teams of 2 or 3, totalling 30 volunteers. Each team was assigned a geographical zone to spot and report illegal dumping sites.</p>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="timeline-image">
-                            <img class="img-circle img-responsive" src="{{ url_for('static', filename='img/trashout-app.png') }}" alt="">
-                        </div>
-                        <div class="timeline-panel">
-                            <div class="timeline-heading">
-                                <h4>Leveraging Reusability</h4>
-                                <h4 class="subheading">The TrashOut App</h4>
-                            </div>
-                            <div class="timeline-body">
-                                <p class="text-muted">No need to re-invent the wheel when we can re-use proven data collection solutions. TrashOut is an already existing world initiative to locate and report all illegal dumps.</p>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="timeline-inverted">
-                        <div class="timeline-image">
-                            <img class="img-circle img-responsive" src="{{ url_for('static', filename='img/old-school.png') }}" alt="">
-                        </div>
-                        <div class="timeline-panel">
-                            <div class="timeline-heading">
-                                <h4>Don't Fear The Analog</h4>
-                                <h4 class="subheading">Old School</h4>
-                            </div>
-                            <div class="timeline-body">
-                                <p class="text-muted">When the TrashOut app wasn't compatible with some of our smartphones, we simply collected data the old school way; with clipboards, printed maps, and pens.</p>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="timeline-image">
-                            <img class="img-circle img-responsive" src="{{ url_for('static', filename='img/cabrati.png') }}" alt="">
-                        </div>
-                        <div class="timeline-panel">
-                            <div class="timeline-heading">
-                                <h4>Reusing Open Data</h4>
-                                <h4 class="subheading">The More the Merrier</h4>
-                            </div>
-                            <div class="timeline-body">
-                                <p class="text-muted">The municipality's waste management company had recently opened data on its garbage truck routes so we incorporated those as well.</p>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="timeline-inverted">
-                        <div class="timeline-image">
-                            <img class="img-circle img-responsive" src="{{ url_for('static', filename='img/heatmap.png') }}" alt="">
-                        </div>
-                        <div class="timeline-panel">
-                            <div class="timeline-heading">
-                                <h4>Rapid Prototyping</h4>
-                                <h4 class="subheading">From Data to Insight</h4>
-                            </div>
-                            <div class="timeline-body">
-                                <p class="text-muted">We played with the data as soon as it was colleced and experimented with neat visualizations when, all of a sudden, we ended up with this neat prototype!</p>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="timeline-inverted">
-                        <div class="timeline-image">
-                            <h4>It's time
-                                <br>to clean
-                                <br>Gjakova!</h4>
-                        </div>
-                    </li>
+                        </li>
+                        {% set rank = rank + 1 %}
+                    {% endfor %}
                 </ul>
             </div>
         </div>

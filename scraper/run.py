@@ -19,7 +19,7 @@ def scraper():
 def scrape_absence_data():
 
     db.absence.remove({})
-    print "Absence Data Importing Started..."
+    print "Scraping parliament session absentee data..."
 
     # load kenesh page
     br = mechanize.Browser()
@@ -63,7 +63,7 @@ def scrape_absence_data():
         }
 
         # Iterate through out table rows, use slicing to skip the header
-        for row in table_rows[1:]:
+        for idx, row in enumerate(table_rows[1:]):
             json_obj = {}
             # iterate through every cell in table
             for index, cell in enumerate(row.findAll('td')):
@@ -148,19 +148,22 @@ def scrape_absence_data():
             # Time to save the json document in mongodb
             db.absence.insert(json_obj)
 
+            print "%i: %s %s" % (idx+1, json_obj['lastName'], json_obj['firstName'])
+
             # Decrement counters as the rows pass
             if temp_data['reason']['counter'] > 0:
                 temp_data['reason']['counter'] -= 1
             if temp_data['date']['counter'] > 0:
                 temp_data['date']['counter'] -= 1
-    print "Absence Data Imported!"
+
+    print "Scraping complete"
 
 
 # Funtction which will scrape MP's bio data
 def scrape_mp_bio_data():
 
     db.deputies.remove({})
-    print "MP's Bio Data Importing Started..."
+    print "Scraping members of parliament bio..."
 
     # browsing links in mp's page
     br2 = mechanize.Browser()
@@ -328,7 +331,8 @@ def scrape_mp_bio_data():
             json_obj['imgUrl'] = img_url
         # insert data to database
         db.deputies.insert(json_obj)
-    print "Mp's Bio Data Imported!"
+
+    print "Scraping complete!"
 
 
 # Check if the table cell(td) has attribute rowspan and return the value of it

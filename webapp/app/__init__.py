@@ -4,8 +4,12 @@ import ConfigParser
 from flask.ext.pymongo import PyMongo
 from logging.handlers import RotatingFileHandler
 
+from utils.mongo_utils import MongoUtils
+
 # Create MongoDB database object.
 mongo = PyMongo()
+
+mongo_utils = MongoUtils()
 
 
 def create_app():
@@ -21,10 +25,16 @@ def create_app():
 
     #Import blueprint modules
     from app.mod_rank.views import mod_rank
+    from app.mod_api.views import mod_api
+
+    # Register the blueprint modules
     app.register_blueprint(mod_rank)
+    app.register_blueprint(mod_api)
 
     #Initialize the app to work with MongoDB
     mongo.init_app(app, config_prefix='MONGO')
+
+    mongo_utils.init(mongo)
 
     return app
 
