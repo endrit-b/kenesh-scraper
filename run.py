@@ -10,7 +10,9 @@ db = client.kenesh
 
 
 def scraper():
-    db.keneshScraper.remove({})
+    db.absence.remove({})
+    db.deputies.remove({})
+
     # load kenesh page
     br = mechanize.Browser()
     br.set_handle_robots(False)  # ignore robots
@@ -24,11 +26,12 @@ def scraper():
 
     url = "http://www.kenesh.kg/RU/Folders/4258-Uchastie_deputatov_v_zasedaniyax_ZHogorku_Kenesha.aspx"
     br.open(url)
-    doc_array = []
+
     for link in br.links(text_regex="Сведения об участии депутатов в заседаниях"):
-        link_url ="http://www.kenesh.kg/RU/Articles/4669-Svedeniya_ob_uchastii_deputatov_v_zasedaniyax_ZHK_7_marta_2012_goda.aspx"
-        #"http://kenesh.kg" + str(link.url)
-        # Open absentees link.url
+        link_url = "http://kenesh.kg" + str(link.url)
+        #"http://www.kenesh.kg/RU/Articles/4669-Svedeniya_ob_uchastii_deputatov_v_zasedaniyax_ZHK_7_marta_2012_goda.aspx"
+
+        # Open absentees link
         respose = br1.open(link_url)
         # Read content of the link and load it in soup
         html_content = respose.read()
@@ -135,20 +138,19 @@ def scraper():
                                 transferred_vote_to = cell.findAll('div')
                                 json_obj['transferredVoteTo'] = transferred_vote_to[0].text
 
-            #print json_obj
-            doc_array.append(json_obj)
+            print json_obj
+            # Time to save the json document in mongodb
+            db.absence.insert(json_obj)
+
             # Decrement counters as the rows pass
             if temp_data['reason']['counter'] > 0:
                 temp_data['reason']['counter'] -= 1
             if temp_data['date']['counter'] > 0:
                 temp_data['date']['counter'] -= 1
-            #print "----------------------"
-        #print '----------------------------------------'
-    doc = {
-        'absenceData': doc_array
-    }
-    # Time to save the json document in mongodb
-    db.keneshScraper.insert(doc)
+
+        break
+
+
 
     '''
     ####### Scraping data from mp's page #######
@@ -166,8 +168,9 @@ def scraper():
     deputy_url = "http://www.kenesh.kg/RU/Folders/235-Deputaty.aspx"
     br2.open(deputy_url)
     for index, link in enumerate(br2.links(text_regex="Фракция")):
-        if index < 20:
+        if index < 107:
             link_deputy_url = "http://www.kenesh.kg" + str(link.url)
+            #"http://www.kenesh.kg/RU/Articles/297-ABDIEV_Kurmantaj__Frakciya_AtaZHurt.aspx"
 
             text = link.text
             deputy_data = text.split()
@@ -201,12 +204,23 @@ def scraper():
                 div_content = mp_soup.find('div', attrs={'id': "ctl00_ctl00_CPHMiddle_pnlContent"})
 
                 div_cnt_soup = div_content
-                parag_content = div_cnt_soup.findAll('p', attrs={'style': "text-align: justify"})
+                parag_content = div_cnt_soup.findAll('p', attrs={'style':"text-align: justify"})
 
                 p_soup = parag_content
+                print p_soup
                 for sp in p_soup:
                     print sp
-    '''
+
+                    if sp.find('img')['src']:
+                        img_attr = p_soup.find('img')['src']
+                        if not img_attr.startswith('http://www.kenesh'):
+                            print "http://www.kenesh.kg" + str(img_attr)
+                        else:
+                            print str(img_attr)
+
+                print index
+                print "------------------------"
+        '''
 
 
 # Check if the table cell(td) has attribute rowspan and return the value of it
