@@ -35,7 +35,8 @@ def scrape_absence_data():
     url = "http://www.kenesh.kg/RU/Folders/4258-Uchastie_deputatov_v_zasedaniyax_ZHogorku_Kenesha.aspx"
     br.open(url)
 
-    for link in br.links(text_regex="Сведения об участии депутатов в заседаниях"):
+    absence_count = 1
+    for session_idx, link in enumerate(br.links(text_regex="Сведения об участии депутатов в заседаниях")):
         link_url = "http://kenesh.kg" + str(link.url)
 
         # Open absentees link
@@ -63,7 +64,7 @@ def scrape_absence_data():
         }
 
         # Iterate through out table rows, use slicing to skip the header
-        for idx, row in enumerate(table_rows[1:]):
+        for absentee_idx, row in enumerate(table_rows[1:]):
             json_obj = {}
             # iterate through every cell in table
             for index, cell in enumerate(row.findAll('td')):
@@ -148,7 +149,8 @@ def scrape_absence_data():
             # Time to save the json document in mongodb
             db.absence.insert(json_obj)
 
-            print "%i: %s %s" % (idx+1, json_obj['lastName'], json_obj['firstName'])
+            print "%i: %s %s" % (absence_count, json_obj['lastName'], json_obj['firstName'])
+            absence_count = absence_count + 1
 
             # Decrement counters as the rows pass
             if temp_data['reason']['counter'] > 0:
