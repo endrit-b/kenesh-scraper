@@ -3,9 +3,12 @@ from pymongo import MongoClient, database
 import mechanize
 from BeautifulSoup import BeautifulSoup
 from bson import ObjectId
+#import re
 
 client = MongoClient()
 db = client.kenesh
+
+
 def scraper():
     db.keneshScraper.remove({})
     # load kenesh page
@@ -23,7 +26,8 @@ def scraper():
     br.open(url)
     doc_array = []
     for link in br.links(text_regex="Сведения об участии депутатов в заседаниях"):
-        link_url = "http://kenesh.kg" + str(link.url)
+        link_url ="http://www.kenesh.kg/RU/Articles/4669-Svedeniya_ob_uchastii_deputatov_v_zasedaniyax_ZHK_7_marta_2012_goda.aspx"
+        #"http://kenesh.kg" + str(link.url)
         # Open absentees link.url
         respose = br1.open(link_url)
         # Read content of the link and load it in soup
@@ -48,7 +52,6 @@ def scraper():
             }
         }
 
-        doc_id = ObjectId()
         # Iterate through out table rows, use slicing to skip the header
         for row in table_rows[1:]:
             json_obj = {}
@@ -66,8 +69,8 @@ def scraper():
                                 if len(names) > 1:
                                     json_obj['firstName'] = names[1].text
                                 json_obj['lastName'] = names[0].text
-                            # if we are in fourth cell (fourth column)
-                            elif index == 4:
+                            # if we are in third cell (third column)
+                            elif index == 2:
                                 json_obj['transferredVoteTo'] = {}
                                 transferred_vote_to = cell.findAll('div')
                                 json_obj['transferredVoteTo'] = transferred_vote_to[0].text
@@ -139,13 +142,71 @@ def scraper():
                 temp_data['reason']['counter'] -= 1
             if temp_data['date']['counter'] > 0:
                 temp_data['date']['counter'] -= 1
-            print "----------------------"
-        print '----------------------------------------'
+            #print "----------------------"
+        #print '----------------------------------------'
     doc = {
         'absenceData': doc_array
     }
     # Time to save the json document in mongodb
     db.keneshScraper.insert(doc)
+
+    '''
+    ####### Scraping data from mp's page #######
+    # browsing links in mp's page
+    br2 = mechanize.Browser()
+    br2.set_handle_robots(False)  # ignore robots
+    br2.set_handle_refresh(False)  # can sometimes hang without this
+    br2.addheaders = [('User-agent', 'Firefox')]  # User-Agent
+    # browsing links for mp's profile page
+    br3 = mechanize.Browser()
+    br3.set_handle_robots(False)  # ignore robots
+    br3.set_handle_refresh(False)  # can sometimes hang without this
+    br3.addheaders = [('User-agent', 'Firefox')]  # User-Agent
+
+    deputy_url = "http://www.kenesh.kg/RU/Folders/235-Deputaty.aspx"
+    br2.open(deputy_url)
+    for index, link in enumerate(br2.links(text_regex="Фракция")):
+        if index < 20:
+            link_deputy_url = "http://www.kenesh.kg" + str(link.url)
+
+            text = link.text
+            deputy_data = text.split()
+            # extract mp's party from link text
+            if (deputy_data[-2] != "Фракция"):
+                if deputy_data[-2] != "-Фракция":
+                    mp_party = str(deputy_data[-2]) + " " + str(deputy_data[-1])
+            else:
+                mp_party = str(deputy_data[-1])
+
+            # extract mp's first name and last name from link text
+            if len(deputy_data) == 5:
+                deputy_l_name = deputy_data[0]
+                if (deputy_data[2] != "-"):
+                    deputy_f_name = deputy_data[1] + " " + str(deputy_data[2])
+                else:
+                    deputy_f_name = deputy_data[1]
+            elif len(deputy_data) > 5:
+                deputy_l_name = deputy_data[0]
+                if deputy_data[2] != "-":
+                    deputy_f_name = str(deputy_data[1]) + " " + str(deputy_data[2])
+                else:
+                    deputy_f_name = str(deputy_data[1])
+
+            # Open mp's profile page
+            respose = br3.open(link_deputy_url)
+            # Read content of the link and load it in soup
+            html_content = respose.read()
+            mp_soup = BeautifulSoup(html_content)
+            if mp_soup.find('div', attrs={'id': "ctl00_ctl00_CPHMiddle_pnlContent"}):
+                div_content = mp_soup.find('div', attrs={'id': "ctl00_ctl00_CPHMiddle_pnlContent"})
+
+                div_cnt_soup = div_content
+                parag_content = div_cnt_soup.findAll('p', attrs={'style': "text-align: justify"})
+
+                p_soup = parag_content
+                for sp in p_soup:
+                    print sp
+    '''
 
 
 # Check if the table cell(td) has attribute rowspan and return the value of it
