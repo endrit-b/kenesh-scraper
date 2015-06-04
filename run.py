@@ -148,10 +148,6 @@ def scraper():
             if temp_data['date']['counter'] > 0:
                 temp_data['date']['counter'] -= 1
 
-        break
-
-
-
     '''
     ####### Scraping data from mp's page #######
     # browsing links in mp's page
