@@ -2,7 +2,6 @@
 from pymongo import MongoClient
 import mechanize
 from BeautifulSoup import BeautifulSoup
-import re
 
 client = MongoClient()
 db = client.kenesh
@@ -10,13 +9,18 @@ db = client.kenesh
 
 def scraper():
 
-    #scrape_absence_data()
+    # execute MP's bio data scraper
+    scrape_absence_data()
+    # execute MP's bio data scraper
     scrape_mp_bio_data()
 
 
 # Funtction whic will scrape MP's absence data
 def scrape_absence_data():
+
     db.absence.remove({})
+    print "Absence Data Importing Started..."
+
     # load kenesh page
     br = mechanize.Browser()
     br.set_handle_robots(False)  # ignore robots
@@ -141,7 +145,6 @@ def scrape_absence_data():
                                 transferred_vote_to = cell.findAll('div')
                                 json_obj['transferredVoteTo'] = transferred_vote_to[0].text
 
-            print json_obj
             # Time to save the json document in mongodb
             db.absence.insert(json_obj)
 
@@ -150,11 +153,15 @@ def scrape_absence_data():
                 temp_data['reason']['counter'] -= 1
             if temp_data['date']['counter'] > 0:
                 temp_data['date']['counter'] -= 1
+    print "Absence Data Imported!"
 
 
-# Funtction whic will scrape MP's bio data
+# Funtction which will scrape MP's bio data
 def scrape_mp_bio_data():
+
     db.deputies.remove({})
+    print "MP's Bio Data Importing Started..."
+
     # browsing links in mp's page
     br2 = mechanize.Browser()
     br2.set_handle_robots(False)  # ignore robots
@@ -168,91 +175,108 @@ def scrape_mp_bio_data():
 
     deputy_url = "http://www.kenesh.kg/RU/Folders/235-Deputaty.aspx"
     br2.open(deputy_url)
-    '''
+
+    # Iterate links of factions
     for index, link in enumerate(br2.links(text_regex="Фракция")):
-        if index < 2:
-            link_deputy_url = "http://www.kenesh.kg" + str(link.url)
-            #"http://www.kenesh.kg/RU/Articles/297-ABDIEV_Kurmantaj__Frakciya_AtaZHurt.aspx"
 
-            text = link.text
-            deputy_data = text.split()
-
-            # extract mp's party from link text
-            if (deputy_data[-2] != "Фракция"):
-                if deputy_data[-2] != "-Фракция":
-                    mp_party = str(deputy_data[-2]) + " " + str(deputy_data[-1])
-            else:
-                mp_party = str(deputy_data[-1])
-
-            # extract mp's first name and last name from link text
-            if len(deputy_data) == 5:
-                deputy_l_name = deputy_data[0]
-                if (deputy_data[2] != "-"):
-                    deputy_f_name = deputy_data[1] + " " + str(deputy_data[2])
-                else:
-                    deputy_f_name = deputy_data[1]
-            elif len(deputy_data) > 5:
-                deputy_l_name = deputy_data[0]
-                if deputy_data[2] != "-":
-                    deputy_f_name = str(deputy_data[1]) + " " + str(deputy_data[2])
-                else:
-                    deputy_f_name = str(deputy_data[1])
-            print deputy_f_name
-            print index
-            print "------------------------"
-
-            # Open mp's profile page
-            respose = br3.open(link_deputy_url)
-            # Read content of the link and load it in soup
-            html_content = respose.read()
-            mp_soup = BeautifulSoup(html_content)
-            if mp_soup.find('div', attrs={'id': "ctl00_ctl00_CPHMiddle_pnlContent"}):
-                div_content = mp_soup.find('div', attrs={'id': "ctl00_ctl00_CPHMiddle_pnlContent"})
-
-                div_cnt_soup = div_content
-
-                # Scrape mp's image url from profile page
-                img_content = div_cnt_soup.findAll('img')
-                for img in img_content:
-                    if not img['src'].startswith("../"):
-                        if (index == 98) and (img['height'] != "0"):
-                            img_src = str(img['src'])
-                            if img_src.startswith('http'):
-                                print str(img['src'])
-                            else:
-                                print "http://www.kenesh.kg" + str(img['src'])
-                        else:
-                            img_src = str(img['src'])
-                            if img_src.startswith('http'):
-                                print str(img['src'])
-                            else:
-                                print "http://www.kenesh.kg" + str(img['src'])
-
-                # Scrape mp's bio from profile page
-
-                if div_cnt_soup.findAll('p', attrs={'class': 'MsoNormal'}):
-                    mp_bio = div_cnt_soup.findAll('p', attrs={'class': 'MsoNormal'})
-                    #print mp_bio
-                    bio_txt = mp_bio[0].text
-                elif div_cnt_soup.findAll('p', attrs={'style': "text-align: justify"}):
-                    mp_bio = div_cnt_soup.findAll('p', attrs={'style': "text-align: justify"})
-                    bio_txt = mp_bio[0].text
-                '''
-    for index, link in enumerate(br2.links(text_regex="депутатская группа")):
         link_deputy_url = "http://www.kenesh.kg" + str(link.url)
-        #"http://www.kenesh.kg/RU/Articles/297-ABDIEV_Kurmantaj__Frakciya_AtaZHurt.aspx"
+        json_obj = {}
 
+        # Let's do slicing
         text = link.text
-        print text
         deputy_data = text.split()
-        print len(deputy_data)
-        print index
 
         # extract mp's party from link text
-        if (deputy_data[-2] != "группа"):
+        if (deputy_data[-2] != "Фракция"):
+            if deputy_data[-2] != "-Фракция":
                 mp_party = str(deputy_data[-2]) + " " + str(deputy_data[-1])
         else:
             mp_party = str(deputy_data[-1])
+
+        group = {
+            'type': "Фракция",
+            'name': mp_party
+        }
+        json_obj['group'] = group
+
+        # extract mp's first name and last name from link text
+        if len(deputy_data) == 5:
+            deputy_l_name = deputy_data[0]
+            if (deputy_data[2] != "-"):
+                deputy_f_name = deputy_data[1] + " " + str(deputy_data[2])
+            else:
+                deputy_f_name = deputy_data[1]
+        elif len(deputy_data) > 5:
+            deputy_l_name = deputy_data[0]
+            if deputy_data[2] != "-":
+                deputy_f_name = str(deputy_data[1]) + " " + str(deputy_data[2])
+            else:
+                deputy_f_name = str(deputy_data[1])
+
+        json_obj['firstName'] = deputy_f_name
+        json_obj['lastName'] = deputy_l_name
+        #print(deputy_l_name + ", " + deputy_f_name + " " + deputy_l_name)
+
+        # Open mp's profile page
+        respose = br3.open(link_deputy_url)
+        # Read content of the link and load it in soup
+        html_content = respose.read()
+        mp_soup = BeautifulSoup(html_content)
+        if mp_soup.find('div', attrs={'id': "ctl00_ctl00_CPHMiddle_pnlContent"}):
+            div_content = mp_soup.find('div', attrs={'id': "ctl00_ctl00_CPHMiddle_pnlContent"})
+
+            div_cnt_soup = div_content
+            img_url = ''
+            # Scrape mp's image url from profile page
+            img_content = div_cnt_soup.findAll('img')
+            for img in img_content:
+                if not img['src'].startswith("../"):
+                    if (index == 98) and (img['height'] != "0"):
+                        img_src = str(img['src'])
+                        if img_src.startswith('http'):
+                            img_url = str(img['src'])
+                        else:
+                            print "http://www.kenesh.kg" + str(img['src'])
+                    else:
+                        img_src = str(img['src'])
+                        if img_src.startswith('http'):
+                            img_url = str(img['src'])
+                        else:
+                            img_url = "http://www.kenesh.kg" + str(img['src'])
+            json_obj['imgUrl'] = img_url
+            # Scrape mp's bio from profile page
+            '''
+            if div_cnt_soup.findAll('p', attrs={'class': 'MsoNormal'}):
+                mp_bio = div_cnt_soup.findAll('p', attrs={'class': 'MsoNormal'})
+                #print mp_bio
+                bio_txt = mp_bio[0].text
+            elif div_cnt_soup.findAll('p', attrs={'style': "text-align: justify"}):
+                mp_bio = div_cnt_soup.findAll('p', attrs={'style': "text-align: justify"})
+                bio_txt = mp_bio[0].text
+            '''
+        # insert data to database
+        db.deputies.insert(json_obj)
+
+    # Iterate links of group deputies
+    for index, link in enumerate(br2.links(text_regex="депутатская группа")):
+
+        link_deputy_url = "http://www.kenesh.kg" + str(link.url)
+        #"http://www.kenesh.kg/RU/Articles/297-ABDIEV_Kurmantaj__Frakciya_AtaZHurt.aspx"
+        json_obj = {}
+        text = link.text
+
+        deputy_data = text.split()
+
+        # extract mp's party from link text
+        if (deputy_data[-2] != "группа"):
+            mp_party = str(deputy_data[-2]) + " " + str(deputy_data[-1])
+        else:
+            mp_party = str(deputy_data[-1])
+        group = {
+            'type': "депутатская группа",
+            'name': mp_party
+        }
+        json_obj['group'] = group
 
         # extract mp's first name and last name from link text
         if len(deputy_data) == 6:
@@ -270,10 +294,10 @@ def scrape_mp_bio_data():
         elif len(deputy_data) == 8:
             deputy_l_name = deputy_data[0]
             deputy_f_name = deputy_data[1] + " " + str(deputy_data[2])
-        print deputy_l_name
-        print deputy_f_name
-        print mp_party
-        print "-----------------------"
+
+        json_obj['firstName'] = deputy_f_name
+        json_obj['lastName'] = deputy_l_name
+        #print(deputy_l_name + ", " + deputy_f_name + " " + deputy_l_name)
 
         # Open mp's profile page
         respose = br3.open(link_deputy_url)
@@ -284,7 +308,7 @@ def scrape_mp_bio_data():
             div_content = mp_soup.find('div', attrs={'id': "ctl00_ctl00_CPHMiddle_pnlContent"})
 
             div_cnt_soup = div_content
-
+            img_url = ''
             # Scrape mp's image url from profile page
             img_content = div_cnt_soup.findAll('img')
             for img in img_content:
@@ -292,15 +316,20 @@ def scrape_mp_bio_data():
                     if (index == 98) and (img['height'] != "0"):
                         img_src = str(img['src'])
                         if img_src.startswith('http'):
-                            print str(img['src'])
+                            img_url = str(img['src'])
                         else:
-                            print "http://www.kenesh.kg" + str(img['src'])
+                            img_url = "http://www.kenesh.kg" + str(img['src'])
                     else:
                         img_src = str(img['src'])
                         if img_src.startswith('http'):
-                            print str(img['src'])
+                            img_url = str(img['src'])
                         else:
-                            print "http://www.kenesh.kg" + str(img['src'])
+                            img_url = "http://www.kenesh.kg" + str(img['src'])
+            json_obj['imgUrl'] = img_url
+        # insert data to database
+        db.deputies.insert(json_obj)
+    print "Mp's Bio Data Imported!"
+
 
 # Check if the table cell(td) has attribute rowspan and return the value of it
 def get_rowspan(cell):
