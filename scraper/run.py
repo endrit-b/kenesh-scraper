@@ -2,6 +2,7 @@
 from pymongo import MongoClient
 import mechanize
 from BeautifulSoup import BeautifulSoup
+import re
 
 client = MongoClient()
 db = client.kenesh
@@ -38,6 +39,9 @@ def scrape_absence_data():
     absence_count = 1
     for session_idx, link in enumerate(br.links(text_regex="Сведения об участии депутатов в заседаниях")):
         link_url = "http://kenesh.kg" + str(link.url)
+
+        print ''
+        print 'SESSION: %s' % link_url
 
         # Open absentees link
         respose = br1.open(link_url)
@@ -78,8 +82,12 @@ def scrape_absence_data():
                             if index == 1:
                                 names = cell.findAll('div')
                                 if len(names) > 1:
-                                    json_obj['firstName'] = names[1].text
+                                    # Get first name. Sometimes it has multiple whitespaces in between two names.
+                                    # We replace those multiple whitespaces with just one space using regex
+                                    json_obj['firstName'] = re.sub(r' +', ' ', names[1].text)
+
                                 json_obj['lastName'] = names[0].text
+
                             # if we are in third cell (third column)
                             elif index == 2:
                                 json_obj['transferredVoteTo'] = {}
@@ -149,7 +157,11 @@ def scrape_absence_data():
             # Time to save the json document in mongodb
             db.absence.insert(json_obj)
 
-            print "%i: %s %s" % (absence_count, json_obj['lastName'], json_obj['firstName'])
+            if 'firstName' in json_obj:
+                print "%i: %s %s" % (absence_count, json_obj['lastName'], json_obj['firstName'])
+            else:
+                print "%i: %s" % (absence_count, json_obj['lastName'])
+
             absence_count = absence_count + 1
 
             # Decrement counters as the rows pass
