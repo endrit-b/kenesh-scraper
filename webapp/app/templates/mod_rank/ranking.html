@@ -1,19 +1,23 @@
 {% extends "layout.html" %}
 {% block body %}
 
-
 <script>
+ $(document).ready(function() {
+        var currentPartyType = '{{ party_type }}';
+        if(currentPartyType != ''){
+            $("#party-type").val(currentPartyType);
+        }
 
-
-function getAbsentees(){
-    $.ajax({
-      type: "POST",
-      url: "{{ url_for('mod_api.absentees') }}",
-      data: {}
-    }).done(function() {
-
+        $('#party-type').change(function() {
+            partyType = $('#party-type').val()
+            if (partyType == 'all'){
+                var myWindow = window.open('/', "_self");
+            }else{
+                var url = "/" + $('#party-type').val();
+                var myWindow = window.open(url, "_self");
+            }  
+        });
     });
-}
 </script>
 
 <!-- About Section -->
@@ -26,20 +30,37 @@ function getAbsentees(){
                 <h2 class="section-heading">Top Absentees</h2>
                 <h3 class="section-subheading text-muted">
                     Ranking members of parliament based on their absenteeism.
+                    <br><br>
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group  text-center">
+                            <label class="control-label col-sm-5" for="party-type">Party Type:</label>
+                            <div class="col-sm-3">
+                                <select id="party-type" class="form-control">
+                                    <option value="all">All</option>
+                                    <option value="faction">Фракция</option>
+                                    <option value="deputies">депутатская группа</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
                 </h3>
             </div>
+            
         </div>
+        
+
+
         <div class="row">
             <div class="col-lg-12">
                 <ul class="timeline">
                     {% set rank = 0 %}
                     {% set previous_absence_count = 0 %}
 
-                    {% for absentee in absentees %}
+                    {% for member in members %}
 
-                        {% if absentee.count != previous_absence_count %}
+                        {% if member.absences.count != previous_absence_count %}
                             {% set rank = rank + 1 %}
-                            {% set previous_absence_count = absentee.count %}
+                            {% set previous_absence_count = member.absences.count %}
                         {% endif %}
 
                         {% if loop.index % 2 == 0 %}
@@ -48,19 +69,19 @@ function getAbsentees(){
                         <li class="timeline-inverted">
                         {% endif %}
                             <div class="timeline-image">
-                                <img class="img-circle img-responsive" src="{{ url_for('static', filename='img/') }}{{ absentee.lastName }} {{ absentee.firstName }}.jpg" alt="">
+                                <img class="img-circle img-responsive" src="{{ url_for('static', filename='img/') }}{{ member.lastName }} {{ member.firstName }}.jpg" alt="">
                             </div>
                             <div class="timeline-panel">
                                 <div class="timeline-heading">
-                                    <h4><font style="color:#FDD035">#{{ rank }}:</font> {{ absentee.lastName }}</h4>
-                                    <h4 class="subheading">{{ absentee.firstName }}</h4>
+                                    <h4><font style="color:#FDD035">#{{ rank }}:</font> {{ member.lastName }}</h4>
+                                    <h4 class="subheading">{{ member.firstName }}</h4>
                                 </div>
                                 <div class="timeline-body">
                                     <p class="text-muted">
-                                    Фракция «Ата Мекен»
+                                    {{ member.group.fullName }}
                                     <br>
-                                    <font style="color:#FDD035" size="20"><strong>{{ absentee.count }}</strong></em></font>
-                                    {% if absentee.count > 1 %}
+                                    <font style="color:#FDD035" size="20"><strong>{{ member.absences.count }}</strong></em></font>
+                                    {% if member.absences.count > 1 %}
                                         Absences
                                     {% else %}
                                         Absence

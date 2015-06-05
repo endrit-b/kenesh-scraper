@@ -15,23 +15,20 @@ db = client.kenesh
 def scraper():
 
     # execute absence data scraper.
-    scrape_absence_data()
+    #scrape_absence_data()
 
-    # Execute MP's bio data scraper
+    # execute MP's bio data scraper.
     scrape_mp_bio_data()
 
-    # Sync Data of absentees with their bio data
-    sync_mp_data()
-
     # Download bio images and render thumbnails.
-    #download_bio_images()
+    download_bio_images()
 
 
 # Funtction whic will scrape MP's absence data
 def scrape_absence_data():
 
     db.absence.remove({})
-    print "Scraping parliament session absentee data..."
+    print "\nScraping parliament session absentee data..."
 
     # load kenesh page
     br = mechanize.Browser()
@@ -74,8 +71,7 @@ def scrape_absence_data():
             'reasonDetail': '',
             'date': {
                 'counter': 0,
-                'value': '',
-                'year': 0
+                'value': ''
             }
         }
 
@@ -98,10 +94,9 @@ def scrape_absence_data():
                                     # We replace those multiple whitespaces with just one space using regex
                                     json_obj['firstName'] = re.sub(r' +', ' ', names[1].text).replace('&nbsp;', '').replace('(', '').replace(')', '')
                                 else:
-                                    #FIXME: Not good to use "none," use a blank if you must.
-                                    json_obj['firstName'] = "none"
+                                    json_obj['firstName'] = ""
 
-                                json_obj['lastName'] = names[0].text
+                                json_obj['lastName'] = names[0].text.replace('&nbsp;', '').replace('(', '').replace(')', '')
 
                             # if we are in third cell (third column)
                             elif index == 2:
@@ -113,13 +108,10 @@ def scrape_absence_data():
                         # let's get them from temporary json we build for this reason
                         if temp_data['reason']['counter'] > 0:
                             json_obj['reason'] = temp_data['reason']['value']
-
                             if temp_data['reasonDetail'] != '':
-                                json_obj['reasonDetail'] = temp_data['reasonDetail'].replace('&nbsp;', '').replace('(', '').replace(')', '')
-
+                                json_obj['reasonDetail'] = temp_data['reasonDetail']
                         if temp_data['date']['counter'] > 0:
                             json_obj['sessionDate'] = temp_data['date']['value']
-                            json_obj['sessionYear'] = temp_data['date']['year']
                     else:
                         if cell.findAll('div'):
                             # But first, let's check if any td has rowspan
@@ -143,12 +135,7 @@ def scrape_absence_data():
                                     span_dt_val = get_rowspan(cell)
                                     temp_data['date']['counter'] = int(span_dt_val)
                                     date = cell.findAll('div')
-
-                                    date_str = date[0].text
-                                    year = int(date_str.split('.')[2][0:4])
-                                    temp_data['date']['value'] = date_str
-                                    temp_data['date']['year'] = year
-
+                                    temp_data['date']['value'] = date[0].text
 
                             # if we are in first cell (first column)
                             if index == 1:
@@ -156,15 +143,13 @@ def scrape_absence_data():
                                 if len(names) > 1:
                                     json_obj['firstName'] = re.sub(r' +', ' ', names[1].text).replace('&nbsp;', '').replace('(', '').replace(')', '')
                                 else:
-                                    #FIXME: Not good to use "none," us a blank
-                                    json_obj['firstName'] = "none"
-
-                                json_obj['lastName'] = names[0].text
+                                    json_obj['firstName'] = ""
 
                                 json_obj['lastName'] = names[0].text.replace('&nbsp;', '').replace('(', '').replace(')', '')
 
                             # if we are in second cell (second column)
                             elif index == 2:
+                                json_obj['reason'] = {}
                                 reasons = cell.findAll('div')
                                 json_obj['reason'] = reasons[0].text
 
@@ -173,13 +158,9 @@ def scrape_absence_data():
 
                             # if we are in third cell (third column)
                             elif index == 3:
+                                json_obj['sessionDate'] = {}
                                 date = cell.findAll('div')
-
-                                date_str = date[0].text
-                                year = int(date_str.split('.')[2][0:4])
-
-                                json_obj['sessionDate'] = date_str
-                                json_obj['sessionYear'] = year
+                                json_obj['sessionDate'] = date[0].text
 
                             # if we are in fourth cell (fourth column)
                             elif index == 4:
@@ -203,14 +184,14 @@ def scrape_absence_data():
             if temp_data['date']['counter'] > 0:
                 temp_data['date']['counter'] -= 1
 
-    print "Scraping complete"
+    print "\nScraping complete"
 
 
 # Funtction which will scrape MP's bio data
 def scrape_mp_bio_data():
 
     db.deputies.remove({})
-    print "Scraping members of parliament bio..."
+    print "\nScraping members of parliament bio..."
 
     # browsing links in mp's page
     br2 = mechanize.Browser()
@@ -225,6 +206,8 @@ def scrape_mp_bio_data():
 
     deputy_url = "http://www.kenesh.kg/RU/Folders/235-Deputaty.aspx"
     br2.open(deputy_url)
+
+    mp_count = 1
 
     # Iterate links of factions
     for index, link in enumerate(br2.links(text_regex="Фракция")):
@@ -245,7 +228,8 @@ def scrape_mp_bio_data():
 
         group = {
             'type': "Фракция",
-            'name': mp_party
+            'name': mp_party.replace('«', '').replace('»', '').replace('"', ''),
+            'fullName': "Фракция " + mp_party
         }
         json_obj['group'] = group
 
@@ -271,12 +255,14 @@ def scrape_mp_bio_data():
         # Read content of the link and load it in soup
         html_content = respose.read()
         mp_soup = BeautifulSoup(html_content)
-
         if mp_soup.find('div', attrs={'id': "ctl00_ctl00_CPHMiddle_pnlContent"}):
             div_content = mp_soup.find('div', attrs={'id': "ctl00_ctl00_CPHMiddle_pnlContent"})
 
             div_cnt_soup = div_content
-            img_url = ''
+
+            # Question mark by default
+            img_url = 'http://www.preternia.com/wp-content/uploads/2014/01/1493237_719399828079185_996651153_n.jpg'
+
             # Scrape mp's image url from profile page
             img_content = div_cnt_soup.findAll('img')
             for img in img_content:
@@ -304,13 +290,21 @@ def scrape_mp_bio_data():
                 mp_bio = div_cnt_soup.findAll('p', attrs={'style': "text-align: justify"})
                 bio_txt = mp_bio[0].text
             '''
+
+        # Get record of absences:
+        json_obj['absences'] = get_absence_record(json_obj['firstName'], json_obj['lastName'])
+
         # insert data to database
+        print "%i: %s %s" % (mp_count, json_obj['lastName'], json_obj['firstName'])
+        mp_count = mp_count + 1
+
         db.deputies.insert(json_obj)
 
     # Iterate links of group deputies
     for index, link in enumerate(br2.links(text_regex="депутатская группа")):
 
         link_deputy_url = "http://www.kenesh.kg" + str(link.url)
+        #"http://www.kenesh.kg/RU/Articles/297-ABDIEV_Kurmantaj__Frakciya_AtaZHurt.aspx"
         json_obj = {}
         text = link.text
 
@@ -323,7 +317,8 @@ def scrape_mp_bio_data():
             mp_party = str(deputy_data[-1])
         group = {
             'type': "депутатская группа",
-            'name': mp_party
+            'name': mp_party.replace('«', '').replace('»', '').replace('"', ''),
+            'fullName': "депутатская группа " + mp_party
         }
         json_obj['group'] = group
 
@@ -346,7 +341,6 @@ def scrape_mp_bio_data():
 
         json_obj['firstName'] = deputy_f_name
         json_obj['lastName'] = deputy_l_name
-        #print(deputy_l_name + ", " + deputy_f_name + " " + deputy_l_name)
 
         # Open mp's profile page
         respose = br3.open(link_deputy_url)
@@ -357,7 +351,10 @@ def scrape_mp_bio_data():
             div_content = mp_soup.find('div', attrs={'id': "ctl00_ctl00_CPHMiddle_pnlContent"})
 
             div_cnt_soup = div_content
-            img_url = ''
+
+            # Question mark by default
+            img_url = 'http://www.preternia.com/wp-content/uploads/2014/01/1493237_719399828079185_996651153_n.jpg'
+            
             # Scrape mp's image url from profile page
             img_content = div_cnt_soup.findAll('img')
             for img in img_content:
@@ -374,34 +371,62 @@ def scrape_mp_bio_data():
                             img_url = str(img['src'])
                         else:
                             img_url = "http://www.kenesh.kg" + str(img['src'])
+
             json_obj['imgUrl'] = img_url
+
+        # Get record of absences:
+        json_obj['absences'] = get_absence_record(json_obj['firstName'], json_obj['lastName'])
+
         # insert data to database
+        print "%i: %s %s" % (mp_count, json_obj['lastName'], json_obj['firstName'])
+        mp_count = mp_count + 1
+
         db.deputies.insert(json_obj)
 
-    print "Scraping complete!"
+    print "\nScraping complete!"
 
 
-# Sync Data of absentees and their bio data
-def sync_mp_data():
-    cursor = db.deputies.find()
-    for doc in cursor:
+def get_absence_record(first_name, last_name):
 
-        json_obj = {'group': doc['group'], 'imgUrl': doc['imgUrl']}
+    result = {
+        'count': 0,
+        'record': []
+    }
 
-        f_name = doc['firstName']
-        last_name = doc['lastName']
+    absences = db.absence.find({
+        'lastName': {"$regex": last_name, '$options': 'i'}, #use reges to ignore cases
+        'firstName': first_name
+    })
 
-        db.absence.update({
-            'lastName': {"$regex": last_name, '$options': 'i'},
-            'firstName': {"$regex": f_name, '$options': 'i'}},
-            {"$set": json_obj})
+    for absence in absences:
+
+        mpa = {}
+
+        if 'reason' in absence:
+            mpa['reason'] = absence['reason']
+
+        if 'reasonDetail' in absence:
+            mpa['reasonDetail'] = absence['reasonDetail']
+
+        if 'sessionDate' in absence:
+            mpa['sessionDate'] = absence['sessionDate']
+
+        if 'transferredVoteTo' in absence:
+            mpa['transferredVoteTo'] = absence['transferredVoteTo']
+
+        result['record'].append(mpa)
+
+
+    result['count'] = len(result['record'])
+
+    return result
 
 
 def download_bio_images():
     '''
     Dowload all of the bio images.
     '''
-    print 'Downloading bio images...'
+    print '\nDownloading bio images...'
 
     # Get the path to this scraper's home directory.
     par_dir = os.path.join(__file__, os.pardir)
@@ -444,10 +469,9 @@ def download_bio_images():
 
             img = img.crop((left, upper, right, lower))
             img.thumbnail(THUMB_SIZE, Image.ANTIALIAS)
-            img.save(img_filename, "JPEG")
-
-    print 'Download complete!'
-
+            img.save(img_filename, "JPEG")      
+       
+    print '\nDownload complete!'
 
 # Check if the table cell(td) has attribute rowspan and return the value of it
 def get_rowspan(cell):

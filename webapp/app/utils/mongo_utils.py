@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class MongoUtils(object):
 
     mongo = None
@@ -8,7 +9,7 @@ class MongoUtils(object):
     def init(self, mongo):
         self.mongo = mongo
 
-    def get_absentees(self, year=None, group_type=None, group_name=None):
+    def get_absences(self, year=None):
 
         docs = self.mongo.db.absence.aggregate([
             {
@@ -35,6 +36,40 @@ class MongoUtils(object):
                     "count": "$count"
                 }   
             }
+        ])
+
+        return docs['result']
+
+
+    def get_parliament_members(self, party_type=None):
+
+        match = {'$match': {}}
+
+        if party_type != None:
+            if party_type == 'faction':
+                party_type = 'Фракция'
+            
+            elif party_type == 'deputies':
+                party_type = 'депутатская группа'
+
+            match = {
+                '$match':{
+                    'group.type': party_type
+                } 
+            }
+
+
+        sort = {
+            "$sort": {
+                "absences.count": -1,
+                "lastName": 1,
+                "firstName": 1,
+            }   
+        }
+
+        docs = self.mongo.db.deputies.aggregate([
+            match,
+            sort
         ])
 
         return docs['result']
