@@ -33,10 +33,10 @@
                     <br><br>
                     <form class="form-horizontal" role="form">
                         <div class="form-group  text-center">
-                            <label class="control-label col-sm-5" for="party-type">Party Type:</label>
+                            <label class="control-label col-sm-5" for="party-type">Тип группы:</label>
                             <div class="col-sm-3">
                                 <select id="party-type" class="form-control">
-                                    <option value="all">All</option>
+                                    <option value="all">Все</option>
                                     <option value="faction">Фракция</option>
                                     <option value="deputies">депутатская группа</option>
                                 </select>
@@ -82,9 +82,9 @@
                                     <br>
                                     <font style="color:#FDD035" size="20"><strong>{{ member.absences.count }}</strong></em></font>
                                     {% if member.absences.count > 1 %}
-                                        Absences
+                                        Прогулы
                                     {% else %}
-                                        Absence
+                                        Прогул
                                     {% endif %}
 
                                     </p>
