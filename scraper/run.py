@@ -18,7 +18,7 @@ def scraper():
     scrape_absence_data()
 
     # execute MP's bio data scraper.
-    scrape_mp_bio_data()
+    #scrape_mp_bio_data()
 
     # Download bio images and render thumbnails.
     #download_bio_images()
@@ -71,7 +71,8 @@ def scrape_absence_data():
             'reasonDetail': '',
             'date': {
                 'counter': 0,
-                'value': ''
+                'value': '',
+                'year': 0
             }
         }
 
@@ -92,9 +93,9 @@ def scrape_absence_data():
                                 if len(names) > 1:
                                     # Get first name. Sometimes it has multiple whitespaces in between two names.
                                     # We replace those multiple whitespaces with just one space using regex
-                                    json_obj['firstName'] = re.sub(r' +', ' ', names[1].text)
+                                    json_obj['firstName'] = re.sub(r' +', ' ', names[1].text).replace('&nbsp;', '').replace('(', '').replace(')', '')
 
-                                json_obj['lastName'] = names[0].text
+                                json_obj['lastName'] = names[0].text.replace('&nbsp;', '').replace('(', '').replace(')', '')
 
                             # if we are in third cell (third column)
                             elif index == 2:
@@ -106,10 +107,13 @@ def scrape_absence_data():
                         # let's get them from temporary json we build for this reason
                         if temp_data['reason']['counter'] > 0:
                             json_obj['reason'] = temp_data['reason']['value']
+
                             if temp_data['reasonDetail'] != '':
-                                json_obj['reasonDetail'] = temp_data['reasonDetail']
+                                json_obj['reasonDetail'] = temp_data['reasonDetail'].replace('&nbsp;', '').replace('(', '').replace(')', '')
+
                         if temp_data['date']['counter'] > 0:
                             json_obj['sessionDate'] = temp_data['date']['value']
+                            json_obj['sessionYear'] = temp_data['date']['year']
                     else:
                         if cell.findAll('div'):
                             # But first, let's check if any td has rowspan
@@ -125,36 +129,46 @@ def scrape_absence_data():
                                     temp_data['reason']['value']= reasons[0].text
 
                                     if len(reasons) > 1:
-                                        temp_data['reasonDetail'] = reasons[1].text
+                                        temp_data['reasonDetail'] = reasons[1].text.replace('&nbsp;', '').replace('(', '').replace(')', '')
+
                                 # if td with index 3 has rowspan than get the rowspan value and cell text
                                 # in order to pass its value to other table rows
                                 elif index == 3 and temp_data['date']['counter'] is 0:
                                     span_dt_val = get_rowspan(cell)
                                     temp_data['date']['counter'] = int(span_dt_val)
                                     date = cell.findAll('div')
-                                    temp_data['date']['value'] = date[0].text
+
+                                    date_str = date[0].text
+                                    year = int(date_str.split('.')[2][0:4])
+                                    temp_data['date']['value'] = date_str
+                                    temp_data['date']['year'] = year
+
 
                             # if we are in first cell (first column)
                             if index == 1:
                                 names = cell.findAll('div')
                                 if len(names) > 1:
-                                    json_obj['firstName'] = names[1].text
-                                json_obj['lastName'] = names[0].text
+                                    json_obj['firstName'] = re.sub(r' +', ' ', names[1].text).replace('&nbsp;', '').replace('(', '').replace(')', '')
+
+                                json_obj['lastName'] = names[0].text.replace('&nbsp;', '').replace('(', '').replace(')', '')
 
                             # if we are in second cell (second column)
                             elif index == 2:
-                                json_obj['reason'] = {}
                                 reasons = cell.findAll('div')
                                 json_obj['reason'] = reasons[0].text
 
                                 if len(reasons) > 1:
-                                    json_obj['reasonDetail'] = reasons[1].text
+                                    json_obj['reasonDetail'] = reasons[1].text.replace('&nbsp;', '').replace('(', '').replace(')', '')
 
                             # if we are in third cell (third column)
                             elif index == 3:
-                                json_obj['sessionDate'] = {}
                                 date = cell.findAll('div')
-                                json_obj['sessionDate'] = date[0].text
+
+                                date_str = date[0].text
+                                year = int(date_str.split('.')[2][0:4])
+
+                                json_obj['sessionDate'] = date_str
+                                json_obj['sessionYear'] = year
 
                             # if we are in fourth cell (fourth column)
                             elif index == 4:
