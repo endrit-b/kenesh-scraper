@@ -14,10 +14,25 @@ http://www.kenesh.kg/RU/Folders/235-Deputaty.aspx
 How Does It Work?
 =================
 
-Uses [Mechanize](http://wwwsearch.sourceforge.net/mechanize/) and [BeautifulSoup](http://www.crummy.com/software/BeautifulSoup/) 
+* [Mechanize](http://wwwsearch.sourceforge.net/mechanize/) to simulate browser requests.
+* [BeautifulSoup](http://www.crummy.com/software/BeautifulSoup/) to extract data from HTML.
+* [Pythong Image Library (PIL)](http://www.pythonware.com/products/pil/) to render thumbnails from downloaded bio images.
+
+
 
 Installing and Running
 ======================
+Prequisites on OSX:
+1) Open your terminal and execute:  xcode-select --install
+This is so that the install script can install PIL.
+PIL is for image processing.
+
+2) libjpg - needed so that PIL can create JPEG thumbnails from the downloaded parliament member bio image files.
+Installing libjpg with brew: brew install libjpeg
+
+Prequisites on Ubuntu:
+???
+
 So easy to install and run:
 ```
 bash install.sh

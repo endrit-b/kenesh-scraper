@@ -3,6 +3,10 @@ from pymongo import MongoClient
 import mechanize
 from BeautifulSoup import BeautifulSoup
 import re
+import urllib
+import os
+import PIL
+from PIL import Image
 
 client = MongoClient()
 db = client.kenesh
@@ -10,10 +14,14 @@ db = client.kenesh
 
 def scraper():
 
-    # execute MP's bio data scraper
+    # execute absence data scraper.
     scrape_absence_data()
-    # execute MP's bio data scraper
+
+    # execute MP's bio data scraper.
     scrape_mp_bio_data()
+
+    # Download bio images and render thumbnails.
+    #download_bio_images()
 
 
 # Funtction whic will scrape MP's absence data
@@ -348,6 +356,57 @@ def scrape_mp_bio_data():
 
     print "Scraping complete!"
 
+
+def download_bio_images():
+    '''
+    Dowload all of the bio images.
+    '''
+    print 'Downloading bio images...'
+
+    # Get the path to this scraper's home directory.
+    par_dir = os.path.join(__file__, os.pardir)
+    par_dir_abs_path = os.path.abspath(par_dir)
+    app_dir = os.path.dirname(par_dir_abs_path)
+
+    # Get all of the bios
+    docs = db.deputies.find()
+
+    # For each bio, get the image
+    for doc in docs:
+        first_name = doc['firstName']
+        last_name = doc['lastName']
+        img_url = doc['imgUrl']
+
+        print ''
+        print "%s %s" % (last_name, first_name)
+        print img_url
+
+        if img_url != '':
+            img_filename = "%s/webapp/app/static/img/%s %s.jpg" % (app_dir, last_name, first_name)
+            urllib.urlretrieve(img_url, img_filename)
+
+            THUMB_SIZE = 300, 300
+            img = Image.open(img_filename)
+            width, height = img.size
+
+            if width > height:
+               delta = width - height
+               left = int(delta/2)
+               upper = 0
+               right = height + left
+               lower = height
+            else:
+               delta = height - width
+               left = 0
+               upper = int(delta/2)
+               right = width
+               lower = width + upper
+
+            img = img.crop((left, upper, right, lower))
+            img.thumbnail(THUMB_SIZE, Image.ANTIALIAS)
+            img.save(img_filename, "JPEG")      
+       
+    print 'Download complete!'
 
 # Check if the table cell(td) has attribute rowspan and return the value of it
 def get_rowspan(cell):
