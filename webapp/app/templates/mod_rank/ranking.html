@@ -11,9 +11,9 @@
         $('#party-type').change(function() {
             partyType = $('#party-type').val()
             if (partyType == 'all'){
-                var myWindow = window.open('/', "_self");
+                var myWindow = window.open('http://opendatakosovo.org/app/kenesh', "_self");
             }else{
-                var url = "/" + $('#party-type').val();
+                var url = "http://opendatakosovo.org/app/kenesh/" + $('#party-type').val();
                 var myWindow = window.open(url, "_self");
             }  
         });
