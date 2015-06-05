@@ -10,10 +10,14 @@ db = client.kenesh
 
 def scraper():
 
-    # execute MP's bio data scraper
-    scrape_absence_data()
-    # execute MP's bio data scraper
-    scrape_mp_bio_data()
+    # Execute MP's bio data scraper
+    #scrape_absence_data()
+
+    # Execute MP's bio data scraper
+    #scrape_mp_bio_data()
+
+    # Sync Data of absentees with their bio data
+    sync_mp_data()
 
 
 # Funtction whic will scrape MP's absence data
@@ -232,7 +236,6 @@ def scrape_mp_bio_data():
 
         json_obj['firstName'] = deputy_f_name
         json_obj['lastName'] = deputy_l_name
-        #print(deputy_l_name + ", " + deputy_f_name + " " + deputy_l_name)
 
         # Open mp's profile page
         respose = br3.open(link_deputy_url)
@@ -278,7 +281,6 @@ def scrape_mp_bio_data():
     for index, link in enumerate(br2.links(text_regex="депутатская группа")):
 
         link_deputy_url = "http://www.kenesh.kg" + str(link.url)
-        #"http://www.kenesh.kg/RU/Articles/297-ABDIEV_Kurmantaj__Frakciya_AtaZHurt.aspx"
         json_obj = {}
         text = link.text
 
@@ -347,6 +349,22 @@ def scrape_mp_bio_data():
         db.deputies.insert(json_obj)
 
     print "Scraping complete!"
+
+
+# Sync Data of absentees and their bio data
+def sync_mp_data():
+    cursor = db.deputies.find()
+    for doc in cursor:
+
+        json_obj = {'group': doc['group'], 'imgUrl': doc['imgUrl']}
+
+        f_name = doc['firstName']
+        last_name = doc['lastName']
+
+        db.absence.update({
+            'lastName': {"$regex": last_name, '$options': 'i'},
+            'firstName': {"$regex": f_name, '$options': 'i'}},
+            {"$set": json_obj})
 
 
 # Check if the table cell(td) has attribute rowspan and return the value of it
