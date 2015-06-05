@@ -14,7 +14,6 @@ db = client.kenesh
 
 def scraper():
 
-<<<<<<< HEAD
     # Execute MP's bio data scraper
     #scrape_absence_data()
 
@@ -23,13 +22,12 @@ def scraper():
 
     # Sync Data of absentees with their bio data
     sync_mp_data()
-=======
+
     # execute absence data scraper.
     scrape_absence_data()
 
     # execute MP's bio data scraper.
     scrape_mp_bio_data()
->>>>>>> fb524ca08884e0ec431a4a7cc3ceef3158e6a2d3
 
     # Download bio images and render thumbnails.
     #download_bio_images()
@@ -104,7 +102,8 @@ def scrape_absence_data():
                                     # Get first name. Sometimes it has multiple whitespaces in between two names.
                                     # We replace those multiple whitespaces with just one space using regex
                                     json_obj['firstName'] = re.sub(r' +', ' ', names[1].text)
-
+                                else:
+                                    json_obj['firstName'] = "none"
                                 json_obj['lastName'] = names[0].text
 
                             # if we are in third cell (third column)
@@ -150,6 +149,8 @@ def scrape_absence_data():
                                 names = cell.findAll('div')
                                 if len(names) > 1:
                                     json_obj['firstName'] = names[1].text
+                                else:
+                                    json_obj['firstName'] = "none"
                                 json_obj['lastName'] = names[0].text
 
                             # if we are in second cell (second column)
@@ -366,7 +367,6 @@ def scrape_mp_bio_data():
     print "Scraping complete!"
 
 
-<<<<<<< HEAD
 # Sync Data of absentees and their bio data
 def sync_mp_data():
     cursor = db.deputies.find()
@@ -382,7 +382,7 @@ def sync_mp_data():
             'firstName': {"$regex": f_name, '$options': 'i'}},
             {"$set": json_obj})
 
-=======
+
 def download_bio_images():
     '''
     Dowload all of the bio images.
@@ -430,10 +430,10 @@ def download_bio_images():
 
             img = img.crop((left, upper, right, lower))
             img.thumbnail(THUMB_SIZE, Image.ANTIALIAS)
-            img.save(img_filename, "JPEG")      
-       
+            img.save(img_filename, "JPEG")
+
     print 'Download complete!'
->>>>>>> fb524ca08884e0ec431a4a7cc3ceef3158e6a2d3
+
 
 # Check if the table cell(td) has attribute rowspan and return the value of it
 def get_rowspan(cell):
