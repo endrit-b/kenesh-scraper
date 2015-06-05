@@ -5,8 +5,8 @@ from BeautifulSoup import BeautifulSoup
 import re
 import urllib
 import os
-import PIL
-from PIL import Image
+#import PIL
+#from PIL import Image
 from unidecode import unidecode
 
 client = MongoClient()
@@ -22,7 +22,7 @@ def scraper():
     scrape_mp_bio_data()
 
     # Download bio images and render thumbnails.
-    download_bio_images()
+    #download_bio_images()
 
 
 # Funtction whic will scrape MP's absence data
@@ -436,6 +436,7 @@ def download_bio_images():
     '''
     print '\nDownloading bio images...'
 
+    '''
     # Get the path to this scraper's home directory.
     par_dir = os.path.join(__file__, os.pardir)
     par_dir_abs_path = os.path.abspath(par_dir)
@@ -456,11 +457,11 @@ def download_bio_images():
 
         print ''
         print "%s %s" % (last_name, first_name)
-        print "%s %s" % (last_name_latin, first_name_latin)
+        print "%s %s" % (last_name_lat, first_name_lat)
         print img_url
         
         if img_url != '':
-            img_filename = "%s/webapp/app/static/img/%s %s.jpg" % (app_dir, last_name_latin, first_name_latin)
+            img_filename = "%s/webapp/app/static/img/%s %s.jpg" % (app_dir, last_name_lat, first_name_lat)
             urllib.urlretrieve(img_url, img_filename)
 
             THUMB_SIZE = 300, 300
@@ -483,11 +484,12 @@ def download_bio_images():
             img = img.crop((left, upper, right, lower))
             img.thumbnail(THUMB_SIZE, Image.ANTIALIAS)
             img.save(img_filename, "JPEG")
-         
+    '''    
        
     print '\nDownload complete!'
 
 
+'''
 def translate(text):
     symbols = (u"абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ",
         u"abvgdeejzijklmnoprstufhzcss_y_euaABVGDEEJZIJKLMNOPRSTUFHZCSS_Y_EUA")
@@ -495,6 +497,7 @@ def translate(text):
     tr = {ord(a):ord(b) for a, b in zip(*symbols)}
 
     return text.translate(tr)
+'''
 
 # Check if the table cell(td) has attribute rowspan and return the value of it
 def get_rowspan(cell):
