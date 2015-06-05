@@ -20,14 +20,11 @@ def scraper():
     # Execute MP's bio data scraper
     #scrape_mp_bio_data()
 
-    # Sync Data of absentees with their bio data
-    sync_mp_data()
-
     # execute absence data scraper.
     scrape_absence_data()
 
-    # execute MP's bio data scraper.
-    scrape_mp_bio_data()
+    # Sync Data of absentees with their bio data
+    sync_mp_data()
 
     # Download bio images and render thumbnails.
     #download_bio_images()
@@ -258,6 +255,7 @@ def scrape_mp_bio_data():
         # Read content of the link and load it in soup
         html_content = respose.read()
         mp_soup = BeautifulSoup(html_content)
+
         if mp_soup.find('div', attrs={'id': "ctl00_ctl00_CPHMiddle_pnlContent"}):
             div_content = mp_soup.find('div', attrs={'id': "ctl00_ctl00_CPHMiddle_pnlContent"})
 
