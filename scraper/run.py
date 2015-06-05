@@ -14,14 +14,11 @@ db = client.kenesh
 
 def scraper():
 
-    # Execute MP's bio data scraper
-    #scrape_absence_data()
+    # execute absence data scraper.
+    scrape_absence_data()
 
     # Execute MP's bio data scraper
     #scrape_mp_bio_data()
-
-    # execute absence data scraper.
-    scrape_absence_data()
 
     # Sync Data of absentees with their bio data
     sync_mp_data()
