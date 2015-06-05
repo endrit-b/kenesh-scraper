@@ -7,6 +7,7 @@ import urllib
 import os
 import PIL
 from PIL import Image
+from unidecode import unidecode
 
 client = MongoClient()
 db = client.kenesh
@@ -250,6 +251,10 @@ def scrape_mp_bio_data():
         json_obj['firstName'] = deputy_f_name
         json_obj['lastName'] = deputy_l_name
 
+        json_obj['firstNameLatin'] = unidecode(unicode(deputy_f_name, "utf-8"))
+        json_obj['lastNameLatin'] = unidecode(unicode(deputy_l_name, "utf-8"))
+
+
         # Open mp's profile page
         respose = br3.open(link_deputy_url)
         # Read content of the link and load it in soup
@@ -341,6 +346,9 @@ def scrape_mp_bio_data():
 
         json_obj['firstName'] = deputy_f_name
         json_obj['lastName'] = deputy_l_name
+        
+        json_obj['firstNameLatin'] = unidecode(unicode(deputy_f_name, "utf-8"))
+        json_obj['lastNameLatin'] = unidecode(unicode(deputy_l_name, "utf-8"))
 
         # Open mp's profile page
         respose = br3.open(link_deputy_url)
@@ -440,14 +448,19 @@ def download_bio_images():
     for doc in docs:
         first_name = doc['firstName']
         last_name = doc['lastName']
+
+        first_name_lat = doc['firstNameLatin']
+        last_name_lat = doc['lastNameLatin']
+
         img_url = doc['imgUrl']
 
         print ''
         print "%s %s" % (last_name, first_name)
+        print "%s %s" % (last_name_latin, first_name_latin)
         print img_url
-
+        
         if img_url != '':
-            img_filename = "%s/webapp/app/static/img/%s %s.jpg" % (app_dir, last_name, first_name)
+            img_filename = "%s/webapp/app/static/img/%s %s.jpg" % (app_dir, last_name_latin, first_name_latin)
             urllib.urlretrieve(img_url, img_filename)
 
             THUMB_SIZE = 300, 300
@@ -469,9 +482,19 @@ def download_bio_images():
 
             img = img.crop((left, upper, right, lower))
             img.thumbnail(THUMB_SIZE, Image.ANTIALIAS)
-            img.save(img_filename, "JPEG")      
+            img.save(img_filename, "JPEG")
+         
        
     print '\nDownload complete!'
+
+
+def translate(text):
+    symbols = (u"абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ",
+        u"abvgdeejzijklmnoprstufhzcss_y_euaABVGDEEJZIJKLMNOPRSTUFHZCSS_Y_EUA")
+
+    tr = {ord(a):ord(b) for a, b in zip(*symbols)}
+
+    return text.translate(tr)
 
 # Check if the table cell(td) has attribute rowspan and return the value of it
 def get_rowspan(cell):

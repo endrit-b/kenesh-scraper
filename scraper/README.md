@@ -19,7 +19,6 @@ How Does It Work?
 * [Pythong Image Library (PIL)](http://www.pythonware.com/products/pil/) to render thumbnails from downloaded bio images.
 
 
-
 Installing and Running
 ======================
 Prequisites on OSX:
@@ -31,7 +30,9 @@ PIL is for image processing.
 Installing libjpg with brew: brew install libjpeg
 
 Prequisites on Ubuntu:
-???
+sudo apt-get build-dep python-imaging
+sudo apt-get install libjpeg8 libjpeg62-dev libfreetype6 libfreetype6-dev
+sudo pip install Pillow
 
 So easy to install and run:
 ```
