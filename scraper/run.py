@@ -17,8 +17,11 @@ def scraper():
     # execute absence data scraper.
     scrape_absence_data()
 
-    # execute MP's bio data scraper.
-    #scrape_mp_bio_data()
+    # Execute MP's bio data scraper
+    scrape_mp_bio_data()
+
+    # Sync Data of absentees with their bio data
+    sync_mp_data()
 
     # Download bio images and render thumbnails.
     #download_bio_images()
@@ -94,8 +97,11 @@ def scrape_absence_data():
                                     # Get first name. Sometimes it has multiple whitespaces in between two names.
                                     # We replace those multiple whitespaces with just one space using regex
                                     json_obj['firstName'] = re.sub(r' +', ' ', names[1].text).replace('&nbsp;', '').replace('(', '').replace(')', '')
+                                else:
+                                    #FIXME: Not good to use "none," use a blank if you must.
+                                    json_obj['firstName'] = "none"
 
-                                json_obj['lastName'] = names[0].text.replace('&nbsp;', '').replace('(', '').replace(')', '')
+                                json_obj['lastName'] = names[0].text
 
                             # if we are in third cell (third column)
                             elif index == 2:
@@ -149,6 +155,11 @@ def scrape_absence_data():
                                 names = cell.findAll('div')
                                 if len(names) > 1:
                                     json_obj['firstName'] = re.sub(r' +', ' ', names[1].text).replace('&nbsp;', '').replace('(', '').replace(')', '')
+                                else:
+                                    #FIXME: Not good to use "none," us a blank
+                                    json_obj['firstName'] = "none"
+
+                                json_obj['lastName'] = names[0].text
 
                                 json_obj['lastName'] = names[0].text.replace('&nbsp;', '').replace('(', '').replace(')', '')
 
@@ -254,13 +265,13 @@ def scrape_mp_bio_data():
 
         json_obj['firstName'] = deputy_f_name
         json_obj['lastName'] = deputy_l_name
-        #print(deputy_l_name + ", " + deputy_f_name + " " + deputy_l_name)
 
         # Open mp's profile page
         respose = br3.open(link_deputy_url)
         # Read content of the link and load it in soup
         html_content = respose.read()
         mp_soup = BeautifulSoup(html_content)
+
         if mp_soup.find('div', attrs={'id': "ctl00_ctl00_CPHMiddle_pnlContent"}):
             div_content = mp_soup.find('div', attrs={'id': "ctl00_ctl00_CPHMiddle_pnlContent"})
 
@@ -300,7 +311,6 @@ def scrape_mp_bio_data():
     for index, link in enumerate(br2.links(text_regex="депутатская группа")):
 
         link_deputy_url = "http://www.kenesh.kg" + str(link.url)
-        #"http://www.kenesh.kg/RU/Articles/297-ABDIEV_Kurmantaj__Frakciya_AtaZHurt.aspx"
         json_obj = {}
         text = link.text
 
@@ -371,6 +381,22 @@ def scrape_mp_bio_data():
     print "Scraping complete!"
 
 
+# Sync Data of absentees and their bio data
+def sync_mp_data():
+    cursor = db.deputies.find()
+    for doc in cursor:
+
+        json_obj = {'group': doc['group'], 'imgUrl': doc['imgUrl']}
+
+        f_name = doc['firstName']
+        last_name = doc['lastName']
+
+        db.absence.update({
+            'lastName': {"$regex": last_name, '$options': 'i'},
+            'firstName': {"$regex": f_name, '$options': 'i'}},
+            {"$set": json_obj})
+
+
 def download_bio_images():
     '''
     Dowload all of the bio images.
@@ -418,9 +444,10 @@ def download_bio_images():
 
             img = img.crop((left, upper, right, lower))
             img.thumbnail(THUMB_SIZE, Image.ANTIALIAS)
-            img.save(img_filename, "JPEG")      
-       
+            img.save(img_filename, "JPEG")
+
     print 'Download complete!'
+
 
 # Check if the table cell(td) has attribute rowspan and return the value of it
 def get_rowspan(cell):
