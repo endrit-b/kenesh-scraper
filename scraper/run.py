@@ -137,6 +137,8 @@ def scrape_mp_bio_data():
     # for every party type scrape links data
     # Iterate through out the links of factions and deputies group
     for tp in party_types:
+        print " "
+        print "Importng data for party type:" + tp
         scrape_mp_link_data(tp, br2, br3, mp_count)
 
     print "\nScraping complete!"
