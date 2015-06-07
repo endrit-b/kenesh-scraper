@@ -293,14 +293,10 @@ def get_mp_party(deputy_data, json_obj, party_tp):
         if (deputy_data[-2] != "Фракция"):
             if deputy_data[-2] != "-Фракция":
                 mp_party = str(deputy_data[-2]) + " " + str(deputy_data[-1])
+            elif deputy_data[-2] == "-Фракция":
+                mp_party = str(deputy_data[-1])
         else:
             mp_party = str(deputy_data[-1])
-
-        group = {
-            'type': party_tp,
-            'name': mp_party.replace('«', '').replace('»', '').replace('"', ''),
-            'fullName': party_tp + mp_party
-        }
 
     elif party_tp == "депутатская группа":
         # extract mp's party from link text
@@ -308,12 +304,12 @@ def get_mp_party(deputy_data, json_obj, party_tp):
             mp_party = str(deputy_data[-2]) + " " + str(deputy_data[-1])
         else:
             mp_party = str(deputy_data[-1])
-
-        group = {
-            'type': party_tp,
-            'name': mp_party.replace('«', '').replace('»', '').replace('"', ''),
-            'fullName': party_tp + mp_party
-        }
+    print "this is party: " + mp_party
+    group = {
+        'type': party_tp,
+        'name': mp_party.replace('«', '').replace('»', '').replace('"', ''),
+        'fullName': party_tp + mp_party
+    }
     json_obj['group'] = group
 
 
