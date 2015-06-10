@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block body %}
+
+
+<!-- About Section -->
+<section id="about">
+    <div class="container">
+        <div class="row">
+            <div class="timeline-image" align="center">
+                <img class="img-circle img-responsive" src="{{ url_for('static', filename='img/') }}{{ member.lastNameLatin }} {{ member.firstNameLatin }}.jpg" alt="">
+            </div>
+            <div class="col-lg-12 text-center">
+                <h2 class="section-heading">{{ member.lastName }} {{ member.firstName }}</h2>
+               
+                <h3 class="section-subheading text-muted">
+                </h3>
+            </div>
+        </div>
+        <div>
+            {% for absence in member.absences.record %}
+                {{ absence.sessionDate }} - {{ absence.reason }} - {{ absence.reasonDetail }} - <a href="{{ absence.source }}" target="_self">источник данных</a>
+                <br>
+            {% endfor %}
+        </div>
+    </div>      
+</section>
+{% endblock %}

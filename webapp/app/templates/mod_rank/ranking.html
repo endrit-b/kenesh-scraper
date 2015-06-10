@@ -11,23 +11,13 @@
         $('#party-type').change(function() {
             partyType = $('#party-type').val()
             if (partyType == 'all'){
-                var myWindow = window.open('http://opendatakosovo.org/app/kenesh', "_self");
+                var myWindow = window.open("{{ url_for('rank.rank') }}", "_self");
             }else{
-                var url = "http://opendatakosovo.org/app/kenesh/" + $('#party-type').val();
+                var url = "{{ url_for('rank.rank_party_type', party_type='') }}" + $('#party-type').val();
                 var myWindow = window.open(url, "_self");
             }  
         });
     });
-</script>
-
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-53558662-4', 'auto');
-  ga('send', 'pageview');
 </script>
 
 <!-- About Section -->
@@ -92,12 +82,16 @@
                                     <p class="text-muted">
                                     {{ member.group.fullName }}
                                     <br>
-                                    <font style="color:#FDD035" size="20"><strong>{{ member.absences.count }}</strong></em></font>
+                                    <font style="color:#FDD035" size="20">
+                                        <strong>{{ member.absences.count }}</strong>
+                                    </font>
                                     {% if member.absences.count > 1 %}
-                    Пропуски
+                                        Пропуски
                                     {% else %}
                                         Пропуск
                                     {% endif %}
+                                    <br>
+                                    <em><a href="{{ url_for('rank.absences', last_name=member.lastNameLatin, first_name=member.firstNameLatin)}}">Click here for absence details.</a></em>
 
                                     </p>
                                 </div>

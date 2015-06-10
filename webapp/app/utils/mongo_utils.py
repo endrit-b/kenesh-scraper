@@ -41,7 +41,7 @@ class MongoUtils(object):
         return docs['result']
 
 
-    def get_parliament_members(self, party_type=None):
+    def get_parliament_members(self, party_type=None, last_name=None, first_name=None):
 
         match = {'$match': {}}
 
@@ -53,13 +53,16 @@ class MongoUtils(object):
                 party_type = 'депутатская группа'
 
             elif party_type == 'independent':
-                party_type = 'независимый'
+                party_type = ''
 
-            match = {
-                '$match':{
-                    'group.type': party_type
-                } 
-            }
+            match['$match']['group.type'] = party_type
+
+
+        if first_name != None:
+            match['$match']['firstNameLatin'] = first_name
+
+        if last_name != None:
+            match['$match']['lastNameLatin'] = last_name
 
 
         sort = {
@@ -76,3 +79,5 @@ class MongoUtils(object):
         ])
 
         return docs['result']
+
+
