@@ -19,10 +19,10 @@ def scraper():
     scrape_absence_data()
 
     # execute MP's bio data scraper.
-    scrape_mp_bio_data()
+    #scrape_mp_bio_data()
 
     # Download bio images and render thumbnails.
-    download_bio_images()
+    #download_bio_images()
 
 
 # Funtction whic will scrape MP's absence data
@@ -403,6 +403,9 @@ def get_absence_record(first_name, last_name):
 
         if 'transferredVoteTo' in absence:
             mpa['transferredVoteTo'] = absence['transferredVoteTo']
+
+        if 'source' in absence:
+            mpa['source'] = absence['source']
 
         result['record'].append(mpa)
 
