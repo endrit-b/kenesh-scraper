@@ -92,6 +92,7 @@ def scrape_absence_data():
                     build_absentees_json_obj(row, cell, index, temp_data, json_obj)
             # Time to save the json document in mongodb
             db.absence.insert(json_obj)
+            print json_obj
 
             if 'firstName' in json_obj:
                 print "%i: %s %s" % (absence_count, json_obj['lastName'], json_obj['firstName'])
@@ -171,6 +172,10 @@ def build_absentees_json_obj(row, cell, index, temp_data, json_obj):
                 json_obj['transferredVoteTo'] = {}
                 transferred_vote_to = cell.findAll('div')
                 json_obj['transferredVoteTo'] = transferred_vote_to[0].text
+                # lets fill json doc with the data from temporary jason
+                json_obj['reason'] = temp_data['reason']['value']
+                json_obj['reasonDetail'] = temp_data['reasonDetail']
+                json_obj['sessionDate'] = temp_data['date']['value']
             else:
                 json_obj['reason'] = {}
                 reasons = cell.findAll('div')
@@ -208,6 +213,8 @@ def fill_temp_doc_with_data(cell, index, temp_data):
 
             if len(reasons) > 1:
                 temp_data['reasonDetail'] = reasons[1].text.replace('&nbsp;', '').replace('(', '').replace(')', '')
+            else:
+                temp_data['reasonDetail'] = ''
 
         # if td with index 3 has rowspan than get the rowspan value and cell text
         # in order to pass its value to other table rows
