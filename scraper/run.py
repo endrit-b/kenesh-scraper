@@ -22,7 +22,7 @@ def scraper():
     scrape_mp_bio_data()
 
     # Download bio images and render thumbnails.
-    download_bio_images()
+    #download_bio_images()
 
 
 # Funtction whic will scrape MP's absence data
