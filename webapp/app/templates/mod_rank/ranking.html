@@ -60,9 +60,9 @@
 
                     {% for member in members %}
 
-                        {% if member.absences.count != previous_absence_count %}
+                        {% if member.absences.days.count != previous_absence_count %}
                             {% set rank = rank + 1 %}
-                            {% set previous_absence_count = member.absences.count %}
+                            {% set previous_absence_count = member.absences.days.count %}
                         {% endif %}
 
                         {% if loop.index % 2 == 0 %}
@@ -96,7 +96,7 @@
                                     {% if member.absences.sessions.count > 1 %}
                                         Sessions
                                     {% else %}
-                                        session
+                                        Session
                                     {% endif %}
                                     <br>
                                     <em><a href="{{ url_for('rank.absences', last_name=member.lastNameLatin, first_name=member.firstNameLatin)}}">Click here for absence details.</a></em>

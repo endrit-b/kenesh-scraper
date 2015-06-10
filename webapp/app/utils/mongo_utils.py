@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from bson.son import SON
+
 class MongoUtils(object):
 
     mongo = None
@@ -66,11 +68,12 @@ class MongoUtils(object):
 
 
         sort = {
-            "$sort": {
-                "absences.days.count": -1,
-                "lastName": 1,
-                "firstName": 1,
-            }   
+            "$sort": SON([
+                ("absences.days.count", -1), 
+                ("absences.sessions.count", -1),
+                ("absences.lastName", -1),
+                ("absences.firstName", -1)
+            ]) 
         }
 
         docs = self.mongo.db.deputies.aggregate([
