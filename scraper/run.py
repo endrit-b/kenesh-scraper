@@ -22,7 +22,7 @@ def scraper():
     scrape_mp_bio_data()
 
     # Download bio images and render thumbnails.
-    #download_bio_images()
+    download_bio_images()
 
 
 # Funtction whic will scrape MP's absence data
@@ -132,7 +132,7 @@ def scrape_mp_bio_data():
 
     mp_count = 1
 
-    party_types = ['АБДЫРАХМАНОВ Омурбек', 'ЖЭЭНБЕКОВ Равшан Бабырбекович']
+    party_types = ['Фракция', 'депутатская группа', 'АБДЫРАХМАНОВ Омурбек', 'ЖЭЭНБЕКОВ Равшан Бабырбекович']
 
     # for every party type scrape links data
     # Iterate through out the links of factions and deputies group
