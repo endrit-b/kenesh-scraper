@@ -17,10 +17,10 @@ db = client.kenesh
 def scraper():
 
     # execute absence data scraper.
-    #scrape_absence_data()
+    scrape_absence_data()
 
     # execute MP's bio data scraper.
-    scrape_mp_bio_data()
+    #scrape_mp_bio_data()
 
     # Download bio images and render thumbnails.
     #download_bio_images()
@@ -482,6 +482,11 @@ def get_absence_record(first_name, last_name):
         for day in absence['absentDays']:
             absences['days']['days'].append(day)
 
+    # sort the days
+    absences['days']['days'].sort()
+
+    if len(absences['days']['days']) > 0:
+        absences['since'] = absences['days']['days'][0]
 
     absences['sessions']['count'] = len(absences['sessions']['sessions'])
     absences['days']['count'] = len(absences['days']['days'])

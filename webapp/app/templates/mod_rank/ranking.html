@@ -99,7 +99,14 @@
                                         Session
                                     {% endif %}
                                     <br>
-                                    <em><a href="{{ url_for('rank.absences', last_name=member.lastNameLatin, first_name=member.firstNameLatin)}}">Click here for absence details.</a></em>
+                                    {% if member.absences.since %}
+                                        <font>
+                                            Since {{ member.absences.since.strftime('%d/%m/%Y') }}
+                                        </font>
+                                        <br>
+                                    {% endif %}
+                                    
+                                    <em><a href="{{ url_for('rank.absences', last_name=member.lastNameLatin, first_name=member.firstNameLatin)}}">Click here for absence details</a></em>
 
                                     </p>
                                 </div>
