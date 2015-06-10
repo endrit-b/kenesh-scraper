@@ -28,7 +28,6 @@
 
   ga('create', 'UA-53558662-4', 'auto');
   ga('send', 'pageview');
-
 </script>
 
 <!-- About Section -->
@@ -38,15 +37,13 @@
             <div class="col-lg-12 text-center">
                 <h2 class="section-heading">Самые отсутствующие люди</h2>
                
-		 <h3 class="">
-		 </h3><br>
-		 <h3 class="section-subheading text-muted">
-Данная визуализация является прототипом, основанным на открытых источниках данных Парламента КР. Прототип служит рабочим примером использования открытых данных и визуализации, поэтому данные нуждаются в дополнительной верификации. 
-<br>
-		   <a href="http://www.kenesh.kg/RU/Folders/4258-Uchastie_deputatov_v_zasedaniyax_ZHogorku_Kenesha.aspx">
-			(источник данных)
-		   </a>
-<br><br>
+                <h3 class="section-subheading text-muted">
+                    Данная визуализация является прототипом, основанным на открытых источниках данных Парламента КР. Прототип служит рабочим примером использования открытых данных и визуализации, поэтому данные нуждаются в дополнительной верификации. 
+                    <br>
+                    <a href="http://www.kenesh.kg/RU/Folders/4258-Uchastie_deputatov_v_zasedaniyax_ZHogorku_Kenesha.aspx">
+                        (источник данных)
+                    </a>
+                    <br><br>
                     <br><br>
                     <form class="form-horizontal" role="form">
                         <div class="form-group  text-center">
@@ -56,6 +53,7 @@
                                     <option value="all">Все</option>
                                     <option value="faction">Фракция</option>
                                     <option value="deputies">депутатская группа</option>
+                                    <option value="independent">независимый</option>
                                 </select>
                             </div>
                         </div>
@@ -96,7 +94,7 @@
                                     <br>
                                     <font style="color:#FDD035" size="20"><strong>{{ member.absences.count }}</strong></em></font>
                                     {% if member.absences.count > 1 %}
-					Пропуски
+                    Пропуски
                                     {% else %}
                                         Пропуск
                                     {% endif %}

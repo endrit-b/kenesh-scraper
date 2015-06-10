@@ -90,9 +90,12 @@ def scrape_absence_data():
                 if index > 0:
                     # Build Json document that we want to save to MongoDB
                     build_absentees_json_obj(row, cell, index, temp_data, json_obj)
+
+            # Let's be sure we include a reference to the data source:
+            json_obj['source'] = link_url
+
             # Time to save the json document in mongodb
             db.absence.insert(json_obj)
-            print json_obj
 
             if 'firstName' in json_obj:
                 print "%i: %s %s" % (absence_count, json_obj['lastName'], json_obj['firstName'])

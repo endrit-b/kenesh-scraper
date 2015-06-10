@@ -52,6 +52,9 @@ class MongoUtils(object):
             elif party_type == 'deputies':
                 party_type = 'депутатская группа'
 
+            elif party_type == 'independent':
+                party_type = 'независимый'
+
             match = {
                 '$match':{
                     'group.type': party_type
