@@ -83,12 +83,20 @@
                                     {{ member.group.fullName }}
                                     <br>
                                     <font style="color:#FDD035" size="20">
-                                        <strong>{{ member.absences.count }}</strong>
+                                        <strong>{{ member.absences.days.count }}</strong>
                                     </font>
-                                    {% if member.absences.count > 1 %}
-                                        Пропуски
+                                    {% if member.absences.days.count > 1 %}
+                                        Days
                                     {% else %}
-                                        Пропуск
+                                        Day
+                                    {% endif %}
+                                    <font style="color:#FDD035" size="5">
+                                        &nbsp;<strong>{{ member.absences.sessions.count }}</strong>
+                                    </font>
+                                    {% if member.absences.sessions.count > 1 %}
+                                        Sessions
+                                    {% else %}
+                                        session
                                     {% endif %}
                                     <br>
                                     <em><a href="{{ url_for('rank.absences', last_name=member.lastNameLatin, first_name=member.firstNameLatin)}}">Click here for absence details.</a></em>

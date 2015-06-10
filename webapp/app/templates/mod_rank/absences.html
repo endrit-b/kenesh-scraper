@@ -18,19 +18,19 @@
                <div class="col-xs-10" style="padding: 5%">
                 <table class="table table-user-information">
                   <tbody>
-                     {% for absence in member.absences.record %}
+                     {% for session in member.absences.sessions.sessions %}
                      <tr>
                         <td>
-                           {{ absence.sessionDate }}
+                           {{ session.date }}
                         </td>
                         <td>
-                           {{ absence.reason }}
+                           {{ session.reason }}
                         </td>
                         <td>
-                           {{ absence.reasonDetail }}
+                           {{ session.detail }}
                         </td>
                         <td>
-                            <a href="{{ absence.source }}" target="_self">источник данных</a>
+                            <a href="{{ session.source }}" target="_self">источник данных</a>
                         </td>
                      </tr>
                      {% endfor %}

@@ -67,7 +67,7 @@ class MongoUtils(object):
 
         sort = {
             "$sort": {
-                "absences.count": -1,
+                "absences.days.count": -1,
                 "lastName": 1,
                 "firstName": 1,
             }   

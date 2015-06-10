@@ -17,10 +17,10 @@ db = client.kenesh
 def scraper():
 
     # execute absence data scraper.
-    scrape_absence_data()
+    #scrape_absence_data()
 
     # execute MP's bio data scraper.
-    #scrape_mp_bio_data()
+    scrape_mp_bio_data()
 
     # Download bio images and render thumbnails.
     #download_bio_images()
@@ -50,6 +50,7 @@ def scrape_absence_data():
     absence_count = 1
     for session_idx, link in enumerate(br.links(text_regex="Сведения об участии депутатов в заседаниях")):
         link_url = "http://kenesh.kg" + str(link.url)
+        #link_url = "http://kenesh.kg/RU/Articles/20930-Svedeniya_ob_uchastii_deputatov_v_zasedaniyax_ZHK_1920fevralya_2014_goda_.aspx"
 
         print ''
         print 'SESSION: %s' % link_url
@@ -214,19 +215,51 @@ def build_absentees_json_obj(row, cell, index, temp_data, json_obj):
 def get_absent_days(date_str):
     absences = []
 
-    absent_date_elems = date_str.split('.')
-    absent_date_days = absent_date_elems[0].split('-')
+    if len(date_str.split('.')) == 4 or len(date_str.split('.')) == 3:
+        # e.g.: 29-30.11.2012г.
 
-    for absent_day_str in absent_date_days:
-        absent_day = int(absent_day_str)
-        absent_month = int(absent_date_elems[1])
-        absent_year = int(absent_date_elems[2][0:4])
+        absent_date_elems = date_str.split('.')
+        absent_date_days = absent_date_elems[0].split('-')
 
-        absence_date_str = '%i/%i/%i' % (absent_day, absent_month, absent_year)
+        for absent_day_str in absent_date_days:
+            absent_day = int(absent_day_str)
+            absent_month = int(absent_date_elems[1])
+            absent_year = int(absent_date_elems[2][0:4])
 
-        #absence_date = datetime.date(absent_year, absent_month, absent_day)
-        absence_date = datetime.strptime(absence_date_str, "%d/%m/%Y")
-        absences.append(absence_date)
+            absence_date_str = '%i/%i/%i' % (absent_day, absent_month, absent_year)
+            absence_date = datetime.strptime(absence_date_str, "%d/%m/%Y")
+            absences.append(absence_date)
+
+    elif len(date_str.split('.')) == 6:
+        # e.g.: 31.10.-01.11.2012г.
+        absent_date_days = date_str.split('.-')
+
+        first_month_str = absent_date_days[0]
+        second_month_str = absent_date_days[1]
+
+        second_month_elems = second_month_str.split('.')
+        second_month_absent_day = int(second_month_elems[0])
+        second_month_absent_month = int(second_month_elems[1])
+        second_month_absent_year = int(second_month_elems[2][0:4])
+
+        second_month_absence_str = '%i/%i/%i' % (second_month_absent_day, second_month_absent_month, second_month_absent_year)
+        second_month_absence_date = datetime.strptime(second_month_absence_str, "%d/%m/%Y")
+
+        first_month_elems = first_month_str.split('.')
+        first_month_absent_day = int(first_month_elems[0])
+        first_month_absent_month = int(first_month_elems[1])
+        first_month_absent_year = second_month_absent_year
+
+        first_month_absence_str = '%i/%i/%i' % (first_month_absent_day, first_month_absent_month, first_month_absent_year)
+        first_month_absence_date = datetime.strptime(first_month_absence_str, "%d/%m/%Y")
+
+        absences.append(first_month_absence_date)
+        absences.append(second_month_absence_date)
+
+    else:
+        error_msg = 'Unsupported date pattern %s' % date_str
+        print error_msg
+        raise ValueError(error_msg)
 
     return absences
 
@@ -409,41 +442,51 @@ def get_image_url(index, respose, json_obj):
 
 def get_absence_record(first_name, last_name):
 
-    result = {
-        'count': 0,
-        'record': []
+    absences = {
+        'sessions': {
+            'count': 0,
+            'sessions': []
+        },
+        'days': {
+            'count': 0,
+            'days': []
+        }
     }
 
-    absences = db.absence.find({
+    absence_cursor = db.absence.find({
         'lastName': {"$regex": last_name, '$options': 'i'}, #use reges to ignore cases
         'firstName': first_name
     })
 
-    for absence in absences:
+    for absence in absence_cursor:
 
-        mpa = {}
+        sa = {}
 
         if 'reason' in absence:
-            mpa['reason'] = absence['reason']
+            sa['reason'] = absence['reason']
 
         if 'reasonDetail' in absence:
-            mpa['reasonDetail'] = absence['reasonDetail']
+            sa['detail'] = absence['reasonDetail']
 
         if 'sessionDate' in absence:
-            mpa['sessionDate'] = absence['sessionDate']
+            sa['date'] = absence['sessionDate']
 
         if 'transferredVoteTo' in absence:
-            mpa['transferredVoteTo'] = absence['transferredVoteTo']
+            sa['transferredVoteTo'] = absence['transferredVoteTo']
 
         if 'source' in absence:
-            mpa['source'] = absence['source']
+            sa['source'] = absence['source']
 
-        result['record'].append(mpa)
+        absences['sessions']['sessions'].append(sa)
+
+        for day in absence['absentDays']:
+            absences['days']['days'].append(day)
 
 
-    result['count'] = len(result['record'])
+    absences['sessions']['count'] = len(absences['sessions']['sessions'])
+    absences['days']['count'] = len(absences['days']['days'])
 
-    return result
+    return absences
 
 
 def download_bio_images():
