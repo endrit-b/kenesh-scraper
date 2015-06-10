@@ -8,6 +8,7 @@ import os
 #import PIL
 #from PIL import Image
 from unidecode import unidecode
+from datetime import datetime
 
 client = MongoClient()
 db = client.kenesh
@@ -19,7 +20,7 @@ def scraper():
     scrape_absence_data()
 
     # execute MP's bio data scraper.
-    scrape_mp_bio_data()
+    #scrape_mp_bio_data()
 
     # Download bio images and render thumbnails.
     #download_bio_images()
@@ -179,6 +180,11 @@ def build_absentees_json_obj(row, cell, index, temp_data, json_obj):
                 json_obj['reason'] = temp_data['reason']['value']
                 json_obj['reasonDetail'] = temp_data['reasonDetail']
                 json_obj['sessionDate'] = temp_data['date']['value']
+
+                absent_days = get_absent_days(temp_data['date']['value'])
+                json_obj['absentDaysCount'] = len(absent_days)
+                json_obj['absentDays'] = absent_days
+
             else:
                 json_obj['reason'] = {}
                 reasons = cell.findAll('div')
@@ -193,11 +199,36 @@ def build_absentees_json_obj(row, cell, index, temp_data, json_obj):
             date = cell.findAll('div')
             json_obj['sessionDate'] = date[0].text
 
+            absent_days = get_absent_days(date[0].text)
+            json_obj['absentDaysCount'] = len(absent_days)
+            json_obj['absentDays'] = absent_days
+
+
         # if we are in fourth cell (fourth column)
         elif index == 4:
             json_obj['transferredVoteTo'] = {}
             transferred_vote_to = cell.findAll('div')
             json_obj['transferredVoteTo'] = transferred_vote_to[0].text
+
+
+def get_absent_days(date_str):
+    absences = []
+
+    absent_date_elems = date_str.split('.')
+    absent_date_days = absent_date_elems[0].split('-')
+
+    for absent_day_str in absent_date_days:
+        absent_day = int(absent_day_str)
+        absent_month = int(absent_date_elems[1])
+        absent_year = int(absent_date_elems[2][0:4])
+
+        absence_date_str = '%i/%i/%i' % (absent_day, absent_month, absent_year)
+
+        #absence_date = datetime.date(absent_year, absent_month, absent_day)
+        absence_date = datetime.strptime(absence_date_str, "%d/%m/%Y")
+        absences.append(absence_date)
+
+    return absences
 
 
 def fill_temp_doc_with_data(cell, index, temp_data):
