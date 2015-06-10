@@ -1,11 +1,15 @@
 {% extends "layout.html" %}
 {% block body %}
 <style type="text/css">
-th {
-  text-align: center;
+.table th {
+  text-align: center;  
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
-td {
+.table td {
     text-align: center;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 </style>
 <section id="about">
@@ -20,11 +24,12 @@ td {
                <div class="col-xs-2">
                  <img class="img-circle img-responsive" src="{{ url_for('static', filename='img/') }}{{ member.lastNameLatin }} {{ member.firstNameLatin }}.jpg" alt="" style="padding: 1%">
                </div>
-               <div class="col-lg-10 col-sm-4" style="padding: 3%">
+               <div class="col-lg-10 col-sm-4" style="padding: 1%">
                   <table class="table table-user-information table-responsive table-condensed">
                     <thead>
                         <th>Дни заседаний</th>
-                        <th>Причина неучастия депутата на заседаниях</th>
+                        <th>Причина неучастия депутата на заседаниях</th>                        
+                        <th>Ф.И.О. депутата, которому передано право голосования</th>
                         <th>источник данных</th>
                     </thead>
                   <tbody>
@@ -40,6 +45,9 @@ td {
                             <div>
                                 {{ session.detail }}
                             </div>                           
+                        </td>
+                        <td>
+                            {{ session.transferredVoteTo }}
                         </td>
                         <td>
                             <a href="{{ session.source }}" target="_self">источник данных</a>
