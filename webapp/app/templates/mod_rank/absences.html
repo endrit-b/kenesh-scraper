@@ -1,6 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
-
+<style type="text/css">
+th {
+  text-align: center;
+}
+td {
+    text-align: center;
+}
+</style>
 <section id="about">
     <div class="container">
         
@@ -14,12 +21,11 @@
                  <img class="img-circle img-responsive" src="{{ url_for('static', filename='img/') }}{{ member.lastNameLatin }} {{ member.firstNameLatin }}.jpg" alt="" style="padding: 1%">
                </div>
                <div class="col-lg-10 col-sm-4" style="padding: 3%">
-                  <table class="table table-user-information table-responsive">
+                  <table class="table table-user-information table-responsive table-condensed">
                     <thead>
-                        <th>Session date</th>
-                        <th>Reason</th>
-                        <th>Details</th>
-                        <th>Link</th>
+                        <th>Дни заседаний</th>
+                        <th>Причина неучастия депутата на заседаниях</th>
+                        <th>источник данных</th>
                     </thead>
                   <tbody>
                      {% for session in member.absences.sessions.sessions %}
@@ -28,10 +34,12 @@
                            {{ session.date }}
                         </td>
                         <td>
-                           {{ session.reason }}
-                        </td>
-                        <td>
-                           {{ session.detail }}
+                            <div>
+                                {{ session.reason }}
+                            </div>
+                            <div>
+                                {{ session.detail }}
+                            </div>                           
                         </td>
                         <td>
                             <a href="{{ session.source }}" target="_self">источник данных</a>
