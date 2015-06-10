@@ -132,7 +132,7 @@ def scrape_mp_bio_data():
 
     mp_count = 1
 
-    party_types = ['Фракция', 'депутатская группа']
+    party_types = ['АБДЫРАХМАНОВ Омурбек', 'ЖЭЭНБЕКОВ Равшан Бабырбекович']
 
     # for every party type scrape links data
     # Iterate through out the links of factions and deputies group
@@ -266,7 +266,7 @@ def get_mps_first_and_last_name(deputy_data, json_obj, party_tp):
             else:
                 deputy_f_name = str(deputy_data[1])
 
-    else:
+    elif party_tp == "депутатская группа":
         if len(deputy_data) == 6:
             deputy_l_name = deputy_data[0]
             if (deputy_data[2] != "-"):
@@ -282,6 +282,15 @@ def get_mps_first_and_last_name(deputy_data, json_obj, party_tp):
         elif len(deputy_data) == 8:
             deputy_l_name = deputy_data[0]
             deputy_f_name = deputy_data[1] + " " + str(deputy_data[2])
+
+    elif party_tp == "АБДЫРАХМАНОВ Омурбек":
+        deputy_l_name = deputy_data[0]
+        deputy_f_name = deputy_data[1]
+
+    elif party_tp == "ЖЭЭНБЕКОВ Равшан Бабырбекович":
+        deputy_l_name = deputy_data[0]
+        deputy_f_name = deputy_data[1] + " " + str(deputy_data[2])
+
     json_obj['firstName'] = deputy_f_name
     json_obj['lastName'] = deputy_l_name
 
@@ -306,6 +315,15 @@ def get_mp_party(deputy_data, json_obj, party_tp):
             mp_party = str(deputy_data[-2]) + " " + str(deputy_data[-1])
         else:
             mp_party = str(deputy_data[-1])
+
+    elif party_tp == "АБДЫРАХМАНОВ Омурбек":
+        mp_party = "независимый"
+        party_tp = ''
+
+    elif party_tp == "ЖЭЭНБЕКОВ Равшан Бабырбекович":
+        mp_party = "беспартийный"
+        party_tp = ''
+
     print "this is party: " + mp_party
     group = {
         'type': party_tp,
