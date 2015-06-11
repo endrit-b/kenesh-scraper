@@ -86,27 +86,27 @@
                                         <strong>{{ member.absences.days.count }}</strong>
                                     </font>
                                     {% if member.absences.days.count > 1 %}
-                                        Days
+                                        дней
                                     {% else %}
-                                        Day
+                                        дня
                                     {% endif %}
                                     <font style="color:#FDD035" size="5">
                                         &nbsp;<strong>{{ member.absences.sessions.count }}</strong>
                                     </font>
                                     {% if member.absences.sessions.count > 1 %}
-                                        Sessions
+                                        сессий
                                     {% else %}
-                                        Session
+                                        сессия
                                     {% endif %}
                                     <br>
                                     {% if member.absences.since %}
                                         <font>
-                                            Since {{ member.absences.since.strftime('%d/%m/%Y') }}
+                                            Начиная {{ member.absences.since.strftime('%d/%m/%Y') }}
                                         </font>
                                         <br>
                                     {% endif %}
                                     
-                                    <em><a href="{{ url_for('rank.absences', last_name=member.lastNameLatin, first_name=member.firstNameLatin)}}">Click here for absence details</a></em>
+                                    <em><a href="{{ url_for('rank.absences', last_name=member.lastNameLatin, first_name=member.firstNameLatin)}}">Подробно о деталях пропуска здесь</a></em>
 
                                     </p>
                                 </div>
