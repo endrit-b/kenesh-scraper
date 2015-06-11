@@ -174,13 +174,18 @@ def build_absentees_json_obj(row, cell, index, temp_data, json_obj):
             # if row length is lower than 5,
             # td with index 2 would be column transsferred vote
             if len(row.findAll('td')) < 5:
-                json_obj['transferredVoteTo'] = {}
-                transferred_vote_to = cell.findAll('div')
-                json_obj['transferredVoteTo'] = transferred_vote_to[0].text
-                # lets fill json doc with the data from temporary jason
-                json_obj['reason'] = temp_data['reason']['value']
-                json_obj['reasonDetail'] = temp_data['reasonDetail']
-                json_obj['sessionDate'] = temp_data['date']['value']
+                if len(row.findAll('td')) == 4:
+                    json_obj['sessionDate'] = {}
+                    date = cell.findAll('div')
+                    json_obj['sessionDate'] = date[0].text
+                else:
+                    json_obj['transferredVoteTo'] = {}
+                    transferred_vote_to = cell.findAll('div')
+                    json_obj['transferredVoteTo'] = transferred_vote_to[0].text
+                    # lets fill json doc with the data from temporary jason
+                    json_obj['reason'] = temp_data['reason']['value']
+                    json_obj['reasonDetail'] = temp_data['reasonDetail']
+                    json_obj['sessionDate'] = temp_data['date']['value']
 
                 absent_days = get_absent_days(temp_data['date']['value'])
                 json_obj['absentDaysCount'] = len(absent_days)
@@ -196,13 +201,19 @@ def build_absentees_json_obj(row, cell, index, temp_data, json_obj):
 
         # if we are in third cell (third column)
         elif index == 3:
-            json_obj['sessionDate'] = {}
-            date = cell.findAll('div')
-            json_obj['sessionDate'] = date[0].text
+            if len(row.findAll('td')) == 4:
+                json_obj['transferredVoteTo'] = {}
+                transferred_vote_to = cell.findAll('div')
+                json_obj['transferredVoteTo'] = transferred_vote_to[0].text
 
-            absent_days = get_absent_days(date[0].text)
-            json_obj['absentDaysCount'] = len(absent_days)
-            json_obj['absentDays'] = absent_days
+            else:
+                json_obj['sessionDate'] = {}
+                date = cell.findAll('div')
+                json_obj['sessionDate'] = date[0].text
+
+                absent_days = get_absent_days(date[0].text)
+                json_obj['absentDaysCount'] = len(absent_days)
+                json_obj['absentDays'] = absent_days
 
 
         # if we are in fourth cell (fourth column)
