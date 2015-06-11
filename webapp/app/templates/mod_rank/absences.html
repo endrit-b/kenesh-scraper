@@ -13,53 +13,80 @@
 }
 </style>
 <section id="about">
-    <div class="container">
-        
-        <div class="panel panel-warning" style="margin-left: 15px; margin-right: 15px">
-           <div class="panel-heading">
-             <h3 class="panel-title" align="center">{{ member.lastName }} {{ member.firstName }}</h3>
-           </div>
-           <div class="panel-body">
-             <div class="row">
-               <div class="col-xs-2">
-                 <img class="img-circle img-responsive" src="{{ url_for('static', filename='img/') }}{{ member.lastNameLatin }} {{ member.firstNameLatin }}.jpg" alt="" style="padding: 1%">
-               </div>
-               <div class="col-lg-10 col-sm-4" style="padding: 1%">
-                  <table class="table table-user-information table-responsive table-condensed">
-                    <thead>
-                        <th>Дни заседаний</th>
-                        <th>Причина неучастия депутата на заседаниях</th>                        
-                        <th>Ф.И.О. депутата, которому передано право голосования</th>
-                        <th>источник данных</th>
-                    </thead>
-                  <tbody>
-                     {% for session in member.absences.sessions.sessions %}
-                     <tr>
-                        <td>
-                           {{ session.date }}
-                        </td>
-                        <td>
-                            <div>
-                                {{ session.reason }}
-                            </div>
-                            <div>
-                                {{ session.detail }}
-                            </div>                           
-                        </td>
-                        <td>
-                            {{ session.transferredVoteTo }}
-                        </td>
-                        <td>
-                            <a href="{{ session.source }}" target="_self">источник данных</a>
-                        </td>
-                     </tr>
-                     {% endfor %}
-                  </tbody>
-                </table>
-               </div>
-             </div>
-           </div>
+    <div class="container" align="center">
+
+        <div>
+          <img class="img-circle img-responsive" src="{{ url_for('static', filename='img/') }}{{ member.lastNameLatin }} {{ member.firstNameLatin }}.jpg" >
         </div>
+
+        <div>
+          <h2>{{ member.lastName }}</h2>
+          <h3>{{ member.firstName}}</h3>
+        </div>
+
+        <div class="timeline-body">
+            <p class="text-muted">
+              <font style="color:#FDD035" size="20">
+                  <strong>{{ member.absences.days.count }}</strong>
+              </font>
+              {% if member.absences.days.count > 1 %}
+                  Days
+              {% else %}
+                  Day
+              {% endif %}
+              <font style="color:#FDD035" size="5">
+                  &nbsp;<strong>{{ member.absences.sessions.count }}</strong>
+              </font>
+              {% if member.absences.sessions.count > 1 %}
+                  Sessions
+              {% else %}
+                  Session
+              {% endif %}
+              <br>
+              {% if member.absences.since %}
+                  <font>
+                      Since {{ member.absences.since.strftime('%d/%m/%Y') }}
+                  </font>
+                  <br>
+              {% endif %}
+              <br>
+            </p>
+        </div>
+
+        {% if member.absences.days.count > 0 %}
+        <table class="table table-user-information table-responsive table-condensed">
+          <thead>
+              <th>Дни заседаний</th>
+              <th>Причина неучастия депутата на заседаниях</th>                        
+              <th>Ф.И.О. депутата, которому передано право голосования</th>
+              <th>источник данных</th>
+          </thead>
+        <tbody>
+           {% for session in member.absences.sessions.sessions %}
+           <tr>
+              <td>
+                 {{ session.date }}
+              </td>
+              <td>
+                  <div>
+                      {{ session.reason }}
+                  </div>
+                  <div>
+                      {{ session.detail }}
+                  </div>                           
+              </td>
+              <td>
+                  {{ session.transferredVoteTo }}
+              </td>
+              <td>
+                  <a href="{{ session.source }}" target="_self">источник данных</a>
+              </td>
+           </tr>
+           {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+
     </div>      
 </section>
 
