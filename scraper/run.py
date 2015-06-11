@@ -178,6 +178,10 @@ def build_absentees_json_obj(row, cell, index, temp_data, json_obj):
                     json_obj['sessionDate'] = {}
                     date = cell.findAll('div')
                     json_obj['sessionDate'] = date[0].text
+                    absent_days = get_absent_days(json_obj['sessionDate'])
+                    json_obj['absentDaysCount'] = len(absent_days)
+                    json_obj['absentDays'] = absent_days
+
                 else:
                     json_obj['transferredVoteTo'] = {}
                     transferred_vote_to = cell.findAll('div')
@@ -187,9 +191,9 @@ def build_absentees_json_obj(row, cell, index, temp_data, json_obj):
                     json_obj['reasonDetail'] = temp_data['reasonDetail']
                     json_obj['sessionDate'] = temp_data['date']['value']
 
-                absent_days = get_absent_days(temp_data['date']['value'])
-                json_obj['absentDaysCount'] = len(absent_days)
-                json_obj['absentDays'] = absent_days
+                    absent_days = get_absent_days(temp_data['date']['value'])
+                    json_obj['absentDaysCount'] = len(absent_days)
+                    json_obj['absentDays'] = absent_days
 
             else:
                 json_obj['reason'] = {}
