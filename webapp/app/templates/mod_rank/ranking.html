@@ -80,7 +80,7 @@
                                 </div>
                                 <div class="timeline-body">
                                     <p class="text-muted">
-                                    {{ member.group.fullName }}
+                                    {{ member.group.fullName|replace('«',' «') }}
                                     <br>
                                     <font style="color:#FDD035" size="20">
                                         <strong>{{ member.absences.days.count }}</strong>
