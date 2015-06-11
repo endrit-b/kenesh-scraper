@@ -48,7 +48,7 @@ def scrape_absence_data():
 
     absence_count = 1
     for session_idx, link in enumerate(br.links(text_regex="Сведения об участии депутатов в заседаниях")):
-        link_url = http://kenesh.kg/RU/Articles/10125-Svedeniya_ob_uchastii_deputatov_v_zasedaniyax_ZHK_0506_sentyabrya_2012_goda.aspx
+        link_url = "http://kenesh.kg" + str(link.url)
 
         print ''
         print 'SESSION: %s' % link_url
