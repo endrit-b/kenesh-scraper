@@ -29,31 +29,41 @@
               <font style="color:#FDD035" size="20">
                   <strong>{{ member.absences.days.count }}</strong>
               </font>
-              {% if member.absences.days.count > 1 %}
-                  дней
-              {% else %}
-                  дня
-              {% endif %}
-              <font style="color:#FDD035" size="5">
-                  &nbsp;<strong>{{ member.absences.sessions.count }}</strong>
-              </font>
-              {% if member.absences.sessions.count > 1 %}
-                  сессий
-              {% else %}
-                  сессия
+              <br>
+              пропущенные очередные заседания ЖК
+              {% if member.absences.since %}
+              начиная с {{ member.absences.since.strftime('%d/%m/%Y') }}
               {% endif %}
               <br>
-              {% if member.absences.since %}
-                  <font>
-                      Начиная {{ member.absences.since.strftime('%d/%m/%Y') }}
-                  </font>
-                  <br>
-              {% endif %}
               <br>
             </p>
         </div>
 
+
         {% if member.absences.days.count > 0 %}
+        {#
+        <table class="table table-user-information table-responsive table-condensed">
+          <thead>
+              <th>Причина неучастия депутата на заседаниях</th>                        
+              <th>Количество пропусков в силу данной причины</th>
+          </thead>
+          <tbody>
+           {% for reason in most_used_reasons %}
+            <tr>
+              <td>
+                 {{ reason[0] }}
+              </td>
+              <td>
+                 {{ reason[1] }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <br><br><br>
+        #}
+
         <table class="table table-user-information table-responsive table-condensed">
           <thead>
               <th style="width:150px;">Дни заседаний</th>

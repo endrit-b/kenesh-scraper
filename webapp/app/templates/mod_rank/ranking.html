@@ -79,36 +79,22 @@
                                     <h4 class="subheading">{{ member.firstName }}</h4>
                                 </div>
                                 <div class="timeline-body">
-                                    <p class="text-muted">
+                                    
                                     {{ member.group.fullName|replace('«',' «') }}
                                     <br>
                                     <font style="color:#FDD035" size="20">
                                         <strong>{{ member.absences.days.count }}</strong>
                                     </font>
-                                    {% if member.absences.days.count > 1 %}
-                                        дней
-                                    {% else %}
-                                        дня
-                                    {% endif %}
-                                    <font style="color:#FDD035" size="5">
-                                        &nbsp;<strong>{{ member.absences.sessions.count }}</strong>
-                                    </font>
-                                    {% if member.absences.sessions.count > 1 %}
-                                        сессий
-                                    {% else %}
-                                        сессия
+                                    <br>
+                                    пропущенные очередные заседания ЖК
+                                    {% if member.absences.since %}
+                                        начиная с {{ member.absences.since.strftime('%d/%m/%Y') }}
                                     {% endif %}
                                     <br>
-                                    {% if member.absences.since %}
-                                        <font>
-                                            Начиная {{ member.absences.since.strftime('%d/%m/%Y') }}
-                                        </font>
-                                        <br>
-                                    {% endif %}
-                                    
+                                    <br>
                                     <em><a href="{{ url_for('rank.absences', last_name=member.lastNameLatin, first_name=member.firstNameLatin)}}">Подробно о деталях пропуска здесь</a></em>
 
-                                    </p>
+                                    
                                 </div>
                             </div>
                         </li>
