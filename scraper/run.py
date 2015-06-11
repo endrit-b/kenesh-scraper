@@ -11,8 +11,7 @@ from unidecode import unidecode
 from datetime import datetime
 
 client = MongoClient()
-db = client.kenesh
-
+db = client.keneshtest
 
 def scraper():
 
@@ -50,7 +49,6 @@ def scrape_absence_data():
     absence_count = 1
     for session_idx, link in enumerate(br.links(text_regex="Сведения об участии депутатов в заседаниях")):
         link_url = "http://kenesh.kg" + str(link.url)
-        #link_url = "http://kenesh.kg/RU/Articles/20930-Svedeniya_ob_uchastii_deputatov_v_zasedaniyax_ZHK_1920fevralya_2014_goda_.aspx"
 
         print ''
         print 'SESSION: %s' % link_url
@@ -173,28 +171,30 @@ def build_absentees_json_obj(row, cell, index, temp_data, json_obj):
         elif index == 2:
             # if row length is lower than 5,
             # td with index 2 would be column transsferred vote
-            if len(row.findAll('td')) < 5:
-                if len(row.findAll('td')) == 4:
-                    json_obj['sessionDate'] = {}
-                    date = cell.findAll('div')
-                    json_obj['sessionDate'] = date[0].text
-                    absent_days = get_absent_days(json_obj['sessionDate'])
-                    json_obj['absentDaysCount'] = len(absent_days)
-                    json_obj['absentDays'] = absent_days
+            if len(row.findAll('td')) < 4:
+                json_obj['transferredVoteTo'] = {}
+                transferred_vote_to = cell.findAll('div')
+                json_obj['transferredVoteTo'] = transferred_vote_to[0].text
+                # lets fill json doc with the data from temporary jason
+                json_obj['reason'] = temp_data['reason']['value']
+                json_obj['reasonDetail'] = temp_data['reasonDetail']
+                json_obj['sessionDate'] = temp_data['date']['value']
 
-                else:
-                    json_obj['transferredVoteTo'] = {}
-                    transferred_vote_to = cell.findAll('div')
-                    json_obj['transferredVoteTo'] = transferred_vote_to[0].text
-                    # lets fill json doc with the data from temporary jason
-                    json_obj['reason'] = temp_data['reason']['value']
-                    json_obj['reasonDetail'] = temp_data['reasonDetail']
-                    json_obj['sessionDate'] = temp_data['date']['value']
+                absent_days = get_absent_days(temp_data['date']['value'])
+                json_obj['absentDaysCount'] = len(absent_days)
+                json_obj['absentDays'] = absent_days
 
-                    absent_days = get_absent_days(temp_data['date']['value'])
-                    json_obj['absentDaysCount'] = len(absent_days)
-                    json_obj['absentDays'] = absent_days
+            elif len(row.findAll('td')) == 4:
+                json_obj['reason'] = temp_data['reason']['value']
+                json_obj['reasonDetail'] = temp_data['reasonDetail']
 
+                json_obj['sessionDate'] = {}
+                date = cell.findAll('div')
+                json_obj['sessionDate'] = date[0].text
+
+                absent_days = get_absent_days(json_obj['sessionDate'])
+                json_obj['absentDaysCount'] = len(absent_days)
+                json_obj['absentDays'] = absent_days
             else:
                 json_obj['reason'] = {}
                 reasons = cell.findAll('div')
@@ -210,7 +210,7 @@ def build_absentees_json_obj(row, cell, index, temp_data, json_obj):
                 transferred_vote_to = cell.findAll('div')
                 json_obj['transferredVoteTo'] = transferred_vote_to[0].text
 
-            else:
+            elif len(row.findAll('td')) > 4:
                 json_obj['sessionDate'] = {}
                 date = cell.findAll('div')
                 json_obj['sessionDate'] = date[0].text
