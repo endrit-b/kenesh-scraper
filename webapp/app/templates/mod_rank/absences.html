@@ -38,14 +38,14 @@
                   &nbsp;<strong>{{ member.absences.sessions.count }}</strong>
               </font>
               {% if member.absences.sessions.count > 1 %}
-                  Sessions
+                  сессий
               {% else %}
-                  Session
+                  сессия
               {% endif %}
               <br>
               {% if member.absences.since %}
                   <font>
-                      Since {{ member.absences.since.strftime('%d/%m/%Y') }}
+                      Начиная {{ member.absences.since.strftime('%d/%m/%Y') }}
                   </font>
                   <br>
               {% endif %}
