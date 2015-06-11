@@ -11,8 +11,7 @@ from unidecode import unidecode
 from datetime import datetime
 
 client = MongoClient()
-db = client.kenesh
-
+db = client.keneshtest
 
 def scraper():
 
@@ -49,8 +48,7 @@ def scrape_absence_data():
 
     absence_count = 1
     for session_idx, link in enumerate(br.links(text_regex="Сведения об участии депутатов в заседаниях")):
-        link_url = "http://kenesh.kg" + str(link.url)
-        #link_url = "http://kenesh.kg/RU/Articles/20930-Svedeniya_ob_uchastii_deputatov_v_zasedaniyax_ZHK_1920fevralya_2014_goda_.aspx"
+        link_url = http://kenesh.kg/RU/Articles/10125-Svedeniya_ob_uchastii_deputatov_v_zasedaniyax_ZHK_0506_sentyabrya_2012_goda.aspx
 
         print ''
         print 'SESSION: %s' % link_url
