@@ -10,8 +10,24 @@ def absences(last_name, first_name):
     List all absences of the parliamentarian
     '''
     docs = mongo_utils.get_parliament_members(last_name=last_name, first_name=first_name)
+    member = docs[0]
 
-    return render_template('mod_rank/absences.html', member=docs[0])
+
+    # Can't get all the reasons, need to restructure data before we can do this.
+    '''
+    most_used_reasons = {}
+
+    for absence in member['absences']['sessions']['sessions']:
+        if absence['reason'] not in most_used_reasons:
+            most_used_reasons[absence['reason']] = 1
+        else:
+            most_used_reasons[absence['reason']] = most_used_reasons[absence['reason']] + 1
+
+
+    most_used_reason_sorted = sorted(most_used_reasons.items(), key=lambda x: x[1], reverse=True)
+    '''
+
+    return render_template('mod_rank/absences.html', member=member)
 
 
 @mod_rank.route('/', methods=['GET'])
