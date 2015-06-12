@@ -11,7 +11,7 @@ from unidecode import unidecode
 from datetime import datetime
 
 client = MongoClient()
-db = client.keneshtest
+db = client.kenesh
 
 def scraper():
 
@@ -48,6 +48,7 @@ def scrape_absence_data():
 
     absence_count = 1
     for session_idx, link in enumerate(br.links(text_regex="Сведения об участии депутатов в заседаниях")):
+        #" http://kenesh.kg/RU/Articles/7129-Svedeniya_ob_uchastii_deputatov_v_zasedaniyax_ZHK_1819_aprelya_2012_goda.aspx"
         link_url = "http://kenesh.kg" + str(link.url)
 
         print ''
@@ -165,7 +166,18 @@ def build_absentees_json_obj(row, cell, index, temp_data, json_obj):
             else:
                 json_obj['firstName'] = ""
 
-            json_obj['lastName'] = names[0].text.replace('&nbsp;', '').replace('(', '').replace(')', '')
+            l_n_text = names[0].text.split()
+            if len(l_n_text) == 1:
+                json_obj['lastName'] = names[0].text.replace('&nbsp;', '').replace('(', '').replace(')', '')
+
+
+            elif len(l_n_text) == 2:
+                json_obj['firstName'] = l_n_text[1].replace('&nbsp;', '').replace('(', '').replace(')', '')
+                json_obj['lastName'] = l_n_text[0].replace('&nbsp;', '').replace('(', '').replace(')', '')
+
+            if len(l_n_text) > 2:
+                json_obj['lastName'] = l_n_text[0].replace('&nbsp;', '').replace('(', '').replace(')', '')
+                json_obj['firstName'] = l_n_text[1].replace('&nbsp;', '').replace('(', '').replace(')', '') + " " + l_n_text[2].replace('&nbsp;', '').replace('(', '').replace(')', '')
 
         # if we are in second cell (second column)
         elif index == 2:
