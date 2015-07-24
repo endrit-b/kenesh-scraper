@@ -16,7 +16,7 @@ db = client.kenesh
 def scraper():
 
     # execute absence data scraper.
-    scrape_absence_data()
+    #scrape_absence_data()
 
     # execute MP's bio data scraper.
     scrape_mp_bio_data()
